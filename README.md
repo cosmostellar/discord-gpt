@@ -22,13 +22,13 @@ It's required to set the environment variables to get the bot started.
 | `cmd:deploy`        | Deploy slash commands for the specified server in `.env`.                                                  |
 | `cmd:deploy-global` | Deploy slash commands.                                                                                     |
 
-### Required Bot Permissions
-#### General Permissions
+## Required Bot Permissions
+### General Permissions
 - Manage Channels
 - Manage Webhooks
 - Read Messages/View Channels
 
-#### Text Permissions
+### Text Permissions
 - Send Messages
 - Manage Messages
 - Read Message History
