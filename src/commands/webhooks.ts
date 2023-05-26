@@ -18,11 +18,11 @@ const commandDescriptions = {
 	subcommands: [
 		{
 			name: "add",
-			description: "Add webhook in this channel.",
+			description: "Add a webhook in this channel.",
 		},
 		{
 			name: "remove",
-			description: "Remove webhook from this channel.",
+			description: "Remove the webhook from this channel.",
 		},
 	],
 	permissionLevel: PermissionFlagsBits.SendMessages,
@@ -117,7 +117,7 @@ module.exports = {
 					if (isSuccessful) {
 						return await interaction.reply("Webhook successfully removed.");
 					} else {
-						return await interaction.reply("There's no webhook to remove.");
+						return await interaction.reply("There is no webhook to remove.");
 					}
 					break;
 				}

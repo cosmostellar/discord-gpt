@@ -14,7 +14,7 @@ const commandDescriptions = {
 	subcommands: [
 		{
 			name: "set",
-			description: "Set custom profile.",
+			description: "Set a custom profile.",
 			option: [
 				{
 					name: "name",
@@ -22,13 +22,13 @@ const commandDescriptions = {
 				},
 				{
 					name: "profile-url",
-					description: "Url of the profile picture.",
+					description: "URL of the profile picture.",
 				},
 			],
 		},
 		{
 			name: "remove",
-			description: "Remove custom profile setting.",
+			description: "Remove the custom profile setting.",
 		},
 	],
 	permissionLevel: PermissionFlagsBits.SendMessages,

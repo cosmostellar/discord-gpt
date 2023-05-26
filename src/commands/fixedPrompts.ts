@@ -11,7 +11,7 @@ import { FixedPrompt, FixedPromptChannels } from "../types/jsonData";
 const commandDescriptions = {
 	name: "fixed-prompts",
 	description:
-		"Set a message the bot can remember in this channel all the time.",
+		"Set a message that the bot can remember in this channel all the time.",
 	subcommands: [
 		{
 			name: "set",
@@ -19,7 +19,7 @@ const commandDescriptions = {
 			option: [
 				{
 					name: "message",
-					description: "a message to set.",
+					description: "The message to set.",
 				},
 			],
 		},
@@ -29,7 +29,7 @@ const commandDescriptions = {
 		},
 		{
 			name: "view",
-			description: "View if there's already assigned message.",
+			description: "View the assigned message, if there is one.",
 		},
 	],
 	permissionLevel: PermissionFlagsBits.SendMessages,
@@ -88,11 +88,11 @@ module.exports = {
 
 					modifyJson("data/fixedPrompt.json", data);
 					return await interaction.reply(
-						`Set fixed prompt successful!\n\`${message}\``
+						`Successfully set the fixed prompt!\n\`${message}\``
 					);
 				} else {
 					return await interaction.reply(
-						"Please try again!\nThere was no message to set."
+						"Please try again!\nThere is no message to set."
 					);
 				}
 				break;
