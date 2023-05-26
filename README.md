@@ -2,7 +2,7 @@
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
 ## Setup Guide
-It's required to set the environment variables to get the bot started.
+To get the bot started, you need to set up the following environment variables.
 
 ### Environment Variables
 | name              | type   |     
@@ -13,14 +13,15 @@ It's required to set the environment variables to get the bot started.
 | OPENAI_API_KEY    | String | 
 
 ### `package.json` Scripts
-| name                | description                                                                                                |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `start`             | Start the code in `build` directory.                                                                       |
-| `build`             | Build the code in `src` directory.                                                                         |
-| `dev:watch`         | Watch `src` directory and applies the change into `build` directory every time typescript codes are saved. |
-| `dev:nodemon`       | Watch changes in `build` folder and run the process again when it detects a change.                        |
-| `cmd:deploy`        | Deploy slash commands for the specified server in `.env`.                                                  |
-| `cmd:deploy-global` | Deploy slash commands.                                                                                     |
+| name                | description                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `start`             | Starts the code in the `build` directory.                                                                     |
+| `build`             | Builds the code in the `src` directory.                                                                       |
+| `dev:watch`         | Watches the `src` directory and applies changes to the `build` directory every time TypeScript code is saved. |
+| `dev:nodemon`       | Watches changes in the `build` folder and reruns the process when it detects a change.                        |
+| `cmd:deploy`        | Deploys slash commands for the specified server in the `.env` file.                                           |
+| `cmd:deploy-global` | Deploys global slash commands.                                                                                |
+
 
 ## Required Bot Permissions
 ### General Permissions
