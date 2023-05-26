@@ -1,0 +1,39 @@
+{
+  "name": "discord-gpt",
+  "version": "1.0.0",
+  "description": "A discordjs bot works with openai api.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "tsc",
+    "dev:watch": "tsc --watch",
+    "dev:nodemon": "nodemon --exec node build/index.js --ignore data/**/*",
+    "cmd:deploy": "node deployCommands.js",
+    "cmd:deploy-global": "node deployGlobalCommands.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decaplanet/discord-gpt.git"
+  },
+  "keywords": [
+    "discordjs",
+    "openai"
+  ],
+  "author": "decaplanet",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/decaplanet/discord-gpt/issues"
+  },
+  "homepage": "https://github.com/decaplanet/discord-gpt#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "@types/node": "^20.2.4",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.0.3",
+    "json-helper-toolkit": "^1.0.1",
+    "openai": "^3.2.1",
+    "typescript": "^5.0.4"
+  }
+}
