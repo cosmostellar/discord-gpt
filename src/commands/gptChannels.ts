@@ -15,7 +15,7 @@ const commandDescriptions = {
 	subcommands: [
 		{
 			name: "add",
-			description: "Add this channel in the GPT channel list.",
+			description: "Add this channel to the GPT channel list.",
 		},
 		{
 			name: "remove",
