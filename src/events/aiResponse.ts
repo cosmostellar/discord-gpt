@@ -52,12 +52,10 @@ const keepTyping = async (channel: TextChannel) => {
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message: Message) {
-		// Get if pingpongs are allowed.
-
 		const [, data] = readJson<IgnoringPrefix>("data/ignoringPrefix.json");
 		const [, { channelList }] = readJson<GptChannel>("data/gptChannel.json");
 
-		//! Prevent unwanted triggers.
+		// Prevent unwanted triggers.
 		if (message.author.bot) return;
 		if (message.content.length === 0) return;
 		if (message.author.id == process.env.DISCORD_CLIENT_ID) return;
@@ -81,7 +79,7 @@ module.exports = {
 			return;
 		}
 
-		//* Read the latest messages and push valid ones in an array(chatLog).
+		// Read the latest messages and push required ones in an array named 'chatLog'.
 		let chatLog: ChatLog[] = [];
 
 		// Show typing status.
@@ -99,7 +97,7 @@ module.exports = {
 			return;
 		}
 
-		// Traverse messages and only keep valid ones.
+		// Traverse messages and only keep required ones.
 		prevMessages.reverse();
 		for (let i = 0; i < prevMessages.length; i++) {
 			const oneMsg: Message = prevMessages[i][1];
@@ -108,7 +106,7 @@ module.exports = {
 				oneMsg.author.id === usefulFuncs.getClientUser()?.id &&
 				!oneMsg.webhookId
 			) {
-				// If "oneMsg" is the bot's own message.
+				// If the message is created by the chatbot.
 				if (oneMsg.reference?.messageId) {
 					const repliedTo = oneMsg.channel.messages.cache.get(
 						oneMsg.reference.messageId
@@ -127,7 +125,7 @@ module.exports = {
 				}
 			} else {
 				if (oneMsg.webhookId && message.guildId) {
-					// When the message is created with Webhooks
+					// If the message is created with Webhooks.
 
 					const [, webhookCustomsData] = readJson<WebhookCustoms>(
 						"data/webhookCustoms.json"
@@ -194,7 +192,7 @@ module.exports = {
 			}
 		}
 
-		//* If the user has their fixed prompts, include it.
+		// If the user has their fixed prompts, include it.
 		const [, fixedPromptData] = readJson<FixedPromptChannels>(
 			"data/fixedPrompt.json"
 		);
@@ -233,12 +231,12 @@ module.exports = {
 		}
 
 		try {
-			//* Get a respond from AI.
+			// Get a respond from AI.
 			const result = await openai
 				.createChatCompletion({
 					model: "gpt-3.5-turbo",
 					messages: chatLog as ChatCompletionRequestMessage[],
-					// max_tokens: 256, // limit token usage
+					// // max_tokens: 256, // limit token usage
 				})
 				.catch((error: Error) => {
 					isTyping = false;
@@ -249,11 +247,11 @@ module.exports = {
 			if (result && result !== undefined) {
 				const { message: reply }: Choice = result.data.choices[0] as Choice;
 
-				//* Detect the user's reply mode.
+				// Detect the user's reply mode.
 				const [, replyModeData] = readJson<ReplyMode>("data/replyMode.json");
 				const replyMode = replyModeData[message.author.id + ""];
 
-				//* Reply Function
+				// Reply Function
 				const doReply = async (inputMessage: string) => {
 					const [, WebhookCustomsData] = readJson<WebhookCustoms>(
 						"data/webhookCustoms.json"
