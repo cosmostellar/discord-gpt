@@ -4,58 +4,11 @@ import { readJson } from "json-helper-toolkit";
 import { usefulFuncs } from "../";
 import { ConfigData, IgnoringPrefix, WebhookCustoms } from "../types/jsonData";
 
-export const parseCommand = (inputMessage: string) => {
-	const list = inputMessage.split(" ");
-
-	let isIncludePrefix = false;
-	let foundPrefix = "";
-
-	const [, { prefix }] = readJson<IgnoringPrefix>("data/ignoringPrefix.json");
-	for (let index = 0; index < prefix.length; index++) {
-		if (inputMessage.includes(prefix[index])) {
-			isIncludePrefix = true;
-			foundPrefix = prefix[index];
-			break;
-		}
-	}
-
-	let commandName: string = "";
-	let argList: string[] = [];
-
-	if (isIncludePrefix === true) {
-		const targetIndex = list[0].indexOf(foundPrefix + "");
-
-		commandName = list[0].slice(targetIndex + 1, list[0].length);
-
-		for (let index = 1; index < list.length; index++) {
-			argList.push(list[index]);
-		}
-
-		return { command: commandName, argList };
-	} else {
-		return null;
-	}
-};
-
 export const delay = (ms: number) => {
 	//* Delay Function
 	// Return a "Promise" that calls "resolve"
 	// once it is done with waiting for the time, "ms".
 	return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-export const connectArgs = (argsArr: string[]) => {
-	let returnValue = "";
-	for (let index = 0; index < argsArr.length; index++) {
-		if (index === argsArr.length - 1) {
-			returnValue += argsArr[index];
-		} else {
-			returnValue += argsArr[index];
-			returnValue += " ";
-		}
-	}
-
-	return returnValue;
 };
 
 interface SendWebhookMessageArgs {
@@ -141,7 +94,7 @@ interface sendWebhookArgs {
 	webhookImg: string;
 }
 
-export const sendWebhook = async ({
+export const sendSimpleWebhook = async ({
 	channelId,
 	content,
 	webhookName,
