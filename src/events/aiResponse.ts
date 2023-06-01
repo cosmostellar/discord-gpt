@@ -4,17 +4,17 @@ import { ChatCompletionRequestMessage } from "openai";
 
 import { openai, usefulFuncs } from "../index";
 import {
-	ConfigData,
-	FixedPromptChannels,
-	GptChannel,
-	IgnoringPrefix,
-	ReplyMode,
-	WebhookCustoms,
+  ConfigData,
+  FixedPromptChannels,
+  GptChannel,
+  IgnoringPrefix,
+  ReplyMode,
+  WebhookCustoms,
 } from "../types/jsonData";
 import {
-	delay,
-	filterWebhookChannels,
-	sendWebhookMessage,
+  delay,
+  filterWebhookChannels,
+  sendWebhookMessage,
 } from "../utils/utilFunctions";
 
 interface ChatLog {

@@ -1,12 +1,12 @@
 import {
-	ChannelType,
-	CommandInteraction,
-	CommandInteractionOptionResolver,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
-	TextChannel,
+  ChannelType,
+  CommandInteraction,
+  CommandInteractionOptionResolver,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+  TextChannel,
 } from "discord.js";
-import { modifyJson, readJson } from "json-helper-toolkit";
+import { readJson } from "json-helper-toolkit";
 
 import { usefulFuncs } from "../index";
 import { ConfigData, GptChannel, WebhookCustoms } from "../types/jsonData";

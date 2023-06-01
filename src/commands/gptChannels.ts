@@ -1,9 +1,9 @@
 import {
-	ChannelType,
-	CommandInteraction,
-	CommandInteractionOptionResolver,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
+  ChannelType,
+  CommandInteraction,
+  CommandInteractionOptionResolver,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
 } from "discord.js";
 import { modifyJson, readJson } from "json-helper-toolkit";
 
