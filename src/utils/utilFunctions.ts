@@ -67,19 +67,28 @@ export const sendWebhookMessage = async ({
 				return;
 			}
 
-			const webhook = await channel.fetchWebhooks();
+			const webhooks = await channel.fetchWebhooks();
 
 			const [, configData] = readJson<ConfigData>("config.json");
 			try {
-				webhook.map(async (two) => {
-					if (two.name === configData.webhookName) {
-						const a = two.send({
+				let isSent = false;
+				webhooks.map(async (webhook) => {
+					if (webhook.name === configData.webhookName) {
+						webhook.send({
 							content,
 							username: validObj.name,
 							avatarURL: validObj.avatar,
 						});
+						isSent = true;
 					}
 				});
+
+				if (!isSent) {
+					usefulFuncs.sendMessage(
+						channel.id,
+						"Webhook is not found. Please add one in this channel."
+					);
+				}
 			} catch (error) {
 				usefulFuncs.sendMessage(channel.id, "Please try again later.");
 			}
@@ -110,18 +119,28 @@ export const sendSimpleWebhook = async ({
 			return;
 		}
 
-		const webhook = await channel.fetchWebhooks();
+		const [, configData] = readJson<ConfigData>("config.json");
+		const webhooks = await channel.fetchWebhooks();
 
 		try {
-			webhook.map(async (two) => {
-				if (two.name === "Plush Bot Webhook") {
-					const a = two.send({
+			let isSent = false;
+			webhooks.map(async (webhook) => {
+				if (webhook.name === configData.webhookName) {
+					webhook.send({
 						content,
 						username: webhookName,
 						avatarURL: webhookImg,
 					});
+					isSent = true;
 				}
 			});
+
+			if (!isSent) {
+				usefulFuncs.sendMessage(
+					channel.id,
+					"Webhook is not found. Please add one in this channel."
+				);
+			}
 		} catch (error) {
 			usefulFuncs.sendMessage(channel.id, "Please try again later.");
 		}
