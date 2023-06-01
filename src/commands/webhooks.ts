@@ -9,7 +9,7 @@ import {
 import { readJson } from "json-helper-toolkit";
 
 import { usefulFuncs } from "../index";
-import { ConfigData, GptChannel, WebhookCustoms } from "../types/jsonData";
+import { ConfigData, WebhookCustoms } from "../types/jsonData";
 import { isValidHttpUrl } from "../utils/utilFunctions";
 
 const commandDescriptions = {
