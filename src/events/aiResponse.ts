@@ -106,7 +106,7 @@ module.exports = {
 				oneMsg.author.id === usefulFuncs.getClientUser()?.id &&
 				!oneMsg.webhookId
 			) {
-				// If the message is created by the chatbot.
+				// If the message was created by the chatbot.
 				if (oneMsg.reference?.messageId) {
 					const repliedTo = oneMsg.channel.messages.cache.get(
 						oneMsg.reference.messageId
@@ -125,7 +125,7 @@ module.exports = {
 				}
 			} else {
 				if (oneMsg.webhookId && message.guildId) {
-					// If the message is created with Webhooks.
+					// If the message was created with Webhooks.
 
 					const [, webhookCustomsData] = readJson<WebhookCustoms>(
 						"data/webhookCustoms.json"
@@ -160,7 +160,7 @@ module.exports = {
 						}
 					}
 				} else {
-					// If "oneMsg" is a message from a user.
+					// If "oneMsg" is a message created by a user.
 					let isContinue = false;
 
 					for (let index = 0; index < data.prefix.length; index++) {
@@ -192,7 +192,7 @@ module.exports = {
 			}
 		}
 
-		// If the user has their fixed prompts, include it.
+		// If the user has their own fixed prompts, include it.
 		const [, fixedPromptData] = readJson<FixedPromptChannels>(
 			"data/fixedPrompt.json"
 		);
