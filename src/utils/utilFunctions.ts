@@ -1,8 +1,15 @@
 import { TextChannel } from "discord.js";
 import { readJson } from "json-helper-toolkit";
+import fs from "node:fs";
+import path from "node:path";
 
 import { usefulFuncs } from "../";
-import { ConfigData, IgnoringPrefix, WebhookCustoms } from "../types/jsonData";
+import {
+	ConfigData,
+	GptChannel,
+	IgnoringPrefix,
+	WebhookCustoms,
+} from "../types/jsonData";
 
 export const delay = (ms: number) => {
 	//* Delay Function
@@ -185,4 +192,67 @@ export const filterWebhookChannels = (
 	}
 
 	return validIndexObj;
+};
+
+const getPath = (input: string) => {
+	const dataDir = path.resolve(process.cwd() + "/data/" + input);
+
+	return dataDir;
+};
+
+interface GenerationQueue {
+	path: string;
+	object: any;
+}
+
+interface ObjectDefaults {
+	emptyObject: {};
+	gptChannel: GptChannel;
+	ignoringPrefix: IgnoringPrefix;
+	webhookCustoms: WebhookCustoms;
+}
+
+export const generateJsonData = () => {
+	const objectDefaults: ObjectDefaults = {
+		emptyObject: {},
+		gptChannel: {
+			channelList: [],
+		},
+		ignoringPrefix: {
+			prefix: [],
+		},
+		webhookCustoms: {
+			arr: [],
+		},
+	};
+
+	const generationQueue: GenerationQueue[] = [
+		{
+			path: getPath("fixedPrompt.json"),
+			object: objectDefaults.emptyObject,
+		},
+		{
+			path: getPath("gptChannel.json"),
+			object: objectDefaults.gptChannel,
+		},
+		{
+			path: getPath("ignoringPrefix.json"),
+			object: objectDefaults.ignoringPrefix,
+		},
+		{
+			path: getPath("replyMode.json"),
+			object: objectDefaults.emptyObject,
+		},
+		{
+			path: getPath("webhookCustoms.json"),
+			object: objectDefaults.webhookCustoms,
+		},
+	];
+
+	generationQueue.forEach((one) => {
+		if (!fs.existsSync(one.path)) {
+			const stringified = JSON.stringify(one.object);
+			fs.writeFileSync(one.path, stringified);
+		}
+	});
 };

@@ -1,15 +1,17 @@
 import {
-  Client,
-  Collection,
-  Events,
-  GatewayIntentBits,
-  Partials,
-  TextChannel,
+	Client,
+	Collection,
+	Events,
+	GatewayIntentBits,
+	Partials,
+	TextChannel,
 } from "discord.js";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import { Configuration, OpenAIApi } from "openai";
 import * as path from "path";
+
+import { generateJsonData } from "./utils/utilFunctions";
 
 dotenv.config();
 
@@ -154,5 +156,9 @@ const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
 });
 export const openai = new OpenAIApi(configuration);
+
+client.on("ready", () => {
+	generateJsonData();
+});
 
 client.login(process.env.DISCORD_BOT_TOKEN);
