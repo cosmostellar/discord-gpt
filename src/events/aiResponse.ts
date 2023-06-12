@@ -4,17 +4,17 @@ import { ChatCompletionRequestMessage } from "openai";
 
 import { openai, usefulFuncs } from "../index";
 import {
-  ConfigData,
-  FixedPromptChannels,
-  GptChannel,
-  IgnoringPrefix,
-  ReplyMode,
-  WebhookCustoms,
+	ConfigData,
+	FixedPromptChannels,
+	GptChannel,
+	IgnoringPrefix,
+	ReplyMode,
+	WebhookCustoms,
 } from "../types/jsonData";
 import {
-  delay,
-  filterWebhookChannels,
-  sendWebhookMessage,
+	delay,
+	filterWebhookChannels,
+	sendWebhookMessage,
 } from "../utils/utilFunctions";
 
 interface ChatLog {
@@ -203,7 +203,10 @@ module.exports = {
 			let fixedPromptMsg = "";
 
 			for (let index = 0; index < channelDataArr.length; index++) {
-				if (channelDataArr[index].userid === message.author.id) {
+				if (
+					channelDataArr[index] &&
+					channelDataArr[index].userid === message.author.id
+				) {
 					fixedPromptMsg = channelDataArr[index].prompt;
 				}
 			}

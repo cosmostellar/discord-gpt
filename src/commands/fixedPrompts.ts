@@ -99,7 +99,7 @@ module.exports = {
 
 			case commandDescriptions.subcommands[1].name:
 				data[interaction.channelId].forEach((one, index) => {
-					if (one.userid === interaction.user.id) {
+					if (one && one.userid === interaction.user.id) {
 						delete data[interaction.channelId][index];
 					}
 				});
@@ -119,7 +119,10 @@ module.exports = {
 					const channelDataArr = data[interaction.channelId + ""];
 
 					for (let index = 0; index < channelDataArr.length; index++) {
-						if (channelDataArr[index].userid === interaction.user.id) {
+						if (
+							channelDataArr[index] &&
+							channelDataArr[index].userid === interaction.user.id
+						) {
 							userFixedPrompt = channelDataArr[index];
 
 							return await interaction.reply(
