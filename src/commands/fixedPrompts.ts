@@ -1,8 +1,8 @@
 import {
-  CommandInteraction,
-  CommandInteractionOptionResolver,
-  PermissionFlagsBits,
-  SlashCommandBuilder,
+	CommandInteraction,
+	CommandInteractionOptionResolver,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
 } from "discord.js";
 import { modifyJson, readJson } from "json-helper-toolkit";
 
@@ -98,7 +98,11 @@ module.exports = {
 				break;
 
 			case commandDescriptions.subcommands[1].name:
-				delete data[interaction.user.id];
+				data[interaction.channelId].forEach((one, index) => {
+					if (one.userid === interaction.user.id) {
+						delete data[interaction.channelId][index];
+					}
+				});
 				modifyJson("data/fixedPrompt.json", data);
 
 				return await interaction.reply(
@@ -108,7 +112,10 @@ module.exports = {
 
 			case commandDescriptions.subcommands[2].name:
 				let userFixedPrompt: FixedPrompt | undefined = undefined;
-				if (data[interaction.channelId + ""]) {
+				if (
+					data[interaction.channelId + ""] &&
+					data[interaction.channelId + ""][0] !== null
+				) {
 					const channelDataArr = data[interaction.channelId + ""];
 
 					for (let index = 0; index < channelDataArr.length; index++) {
