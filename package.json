@@ -1,8 +1,7 @@
 {
   "name": "discord-gpt",
   "version": "1.0.0",
-  "description": "A discordjs bot works with openai api.",
-  "main": "src/index.js",
+  "description": "Talk to GPT-3 in discord!",
   "scripts": {
     "start": "node build/index.js",
     "build": "tsc",
@@ -16,8 +15,11 @@
     "url": "git+https://github.com/decaplanet/discord-gpt.git"
   },
   "keywords": [
-    "discordjs",
-    "openai"
+    "typescript",
+    "discord",
+    "discord-bot,",
+    "openai",
+    "discordjs"
   ],
   "author": "decaplanet",
   "license": "MIT",
