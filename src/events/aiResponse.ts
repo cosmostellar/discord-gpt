@@ -75,6 +75,13 @@ module.exports = {
 				isAvailableChannel = true;
 			}
 		}
+
+		message.mentions.users.forEach((one) => {
+			if (one.id === usefulFuncs.getClientUser()?.id) {
+				isAvailableChannel = true;
+			}
+		});
+
 		if (isAvailableChannel === false) {
 			return;
 		}
