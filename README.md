@@ -1,8 +1,10 @@
 # discord-gpt
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
+
 ## Setup Guide
 To get the bot started, you need to set up the following environment variables.
+
 
 ### Environment Variables
 | name              | type   |     
@@ -11,6 +13,7 @@ To get the bot started, you need to set up the following environment variables.
 | DISCORD_CLIENT_ID | Number |     
 | DISCORD_GUILD_ID  | Number |     
 | OPENAI_API_KEY    | String | 
+
 
 ### `package.json` Scripts
 | name                | description                                                                                                   |
@@ -21,6 +24,9 @@ To get the bot started, you need to set up the following environment variables.
 | `dev:nodemon`       | Watches changes in the `build` folder and reruns the process when it detects a change.                        |
 | `cmd:deploy`        | Deploys slash commands for the specified server in the `.env` file.                                           |
 | `cmd:deploy-global` | Deploys global slash commands.                                                                                |
+
+### ignoringPrefix Slash Command
+By default, server moderators can or and delete the prefix setting related to what prefix should cause the bot to ignore a message. You can delete the command in `src/commands/ignoringPrefix.ts`.
 
 
 ## Required Bot Permissions
@@ -33,4 +39,3 @@ To get the bot started, you need to set up the following environment variables.
 - Send Messages
 - Manage Messages
 - Read Message History
-- Use Slash Commands
