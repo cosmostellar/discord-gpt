@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/decaplanet/discord-gpt#readme",
   "devDependencies": {
-    "nodemon": "^1.18.10"
+    "nodemon": "^2.0.22"
   },
   "dependencies": {
     "@types/node": "^20.2.4",
