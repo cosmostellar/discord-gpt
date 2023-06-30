@@ -11,6 +11,10 @@ module.exports = {
 		const client = usefulFuncs.getClient();
 		const ping = client.ws.ping;
 
+		if (ping === -1) {
+			return await interaction.reply("Try again later.");
+		}
+
 		return await interaction.reply(`ping : ${ping} ms`);
 	},
 };
