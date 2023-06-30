@@ -1,6 +1,49 @@
 # discord-gpt
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
+## Commands
+
+### gpt-channels
+You can set channels where the bot always answers you.
+Otherwise, you need to mention/ping the bot.
+
+| command              | argument |
+| -------------------- | -------- |
+| /gpt-channels add    | (None)   |
+| /gpt-channels remove | (None)   |
+
+### custom-ai-profile
+You can set your preferred photo and name for the answers you receive.
+
+| command                   | argument          | 
+| ------------------------- | ----------------- |
+| /custom-ai-profile set    | name, profile-url |
+| /custom-ai-profile remove | (None)            |
+
+### webhooks
+Because the custom profile feature works with webhooks, you need to add a webhook in your channels.
+
+| command          | argument |
+| ---------------- | -------- |
+| /webhooks add    | (None)   |
+| /webhooks remove | (None)   |
+
+### ignoring-prefix
+You can set which prefix the bot need to ignore in the gpt channels. ex) `!Hey people` when `!` is added.
+
+| command                 | argument |
+| ----------------------- | -------- |
+| /ignoring-prefix add    | prefix   |
+| /ignoring-prefix remove | prefix   |
+| /ignoring-prefix view   | (None)   |
+
+### ping
+Gets the ping.
+
+| command | argument |
+| ------- | -------- |
+| /ping   | (None)   |
+
 
 ## Setup Guide
 To get the bot started, you need to set up the following environment variables.
