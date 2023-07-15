@@ -11,8 +11,6 @@ import * as fs from "fs";
 import { Configuration, OpenAIApi } from "openai";
 import * as path from "path";
 
-import { generateJsonData } from "./utils/utilFunctions";
-
 dotenv.config();
 
 // Client Instance
@@ -156,9 +154,5 @@ const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
 });
 export const openai = new OpenAIApi(configuration);
-
-client.on("ready", () => {
-	generateJsonData();
-});
 
 client.login(process.env.DISCORD_BOT_TOKEN);
