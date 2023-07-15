@@ -259,19 +259,36 @@ module.exports = {
 							const selectedTemplate = guildTemplates?.[pickedIndex - 1];
 
 							if (
-								existingFixedPrompt &&
 								selectedTemplate &&
 								(pickedIndex < 1 || pickedIndex >= guildTemplates.length)
 							) {
-								const isSuccessful = await fixedPrompt.update(
-									interaction.channelId,
-									existingFixedPrompt.id,
-									{
-										prompt: selectedTemplate.message,
-										isTemplate: true,
-									},
-									interaction.guildId
-								);
+								let isSuccessful = false;
+
+								if (existingFixedPrompt) {
+									isSuccessful = await fixedPrompt.update(
+										interaction.channelId,
+										existingFixedPrompt.id,
+										{
+											prompt: selectedTemplate.message,
+											isTemplate: true,
+										},
+										interaction.guildId
+									);
+								} else if (!existingFixedPrompt) {
+									const createdFixedPrompt = await fixedPrompt.create(
+										interaction.channelId,
+										interaction.user.id,
+										{
+											prompt: selectedTemplate.message,
+											isTemplate: true,
+										},
+										interaction.guildId
+									);
+
+									if (createdFixedPrompt) {
+										isSuccessful = true;
+									}
+								}
 
 								if (isSuccessful) {
 									return await interaction.editReply({
