@@ -1,6 +1,7 @@
 # discord-gpt
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
+
 ## Commands
 
 ### gpt-channels
@@ -48,15 +49,14 @@ Gets the ping.
 ## Setup Guide
 To get the bot started, you need to set up the following environment variables.
 
-
 ### Environment Variables
-| name              | type   |     
+| name              | type   |
 | ----------------- | ------ |
-| DISCORD_BOT_TOKEN | String |     
-| DISCORD_CLIENT_ID | Number |     
-| DISCORD_GUILD_ID  | Number |     
-| OPENAI_API_KEY    | String | 
-
+| DISCORD_BOT_TOKEN | String |
+| DISCORD_CLIENT_ID | Number |
+| DISCORD_GUILD_ID  | Number |
+| OPENAI_API_KEY    | String |
+| DATABASE_URL      | String |
 
 ### `package.json` Scripts
 | name                | description                                                                                                   |
