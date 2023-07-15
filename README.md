@@ -1,4 +1,6 @@
 # discord-gpt
+> If you prefer to use the bot without a database, you can alternatively use [json-version](https://github.com/decaplanet/discord-gpt/tree/json-version).
+
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
 
