@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id        String   @id @unique
+  createdAt DateTime @default(now())
+
+  ignoringPrefix      IgnoringPrefix[]
+  channel             Channel[]
+  fixedPromptTemplate FixedPromptTemplate[]
+  customAiProfile     CustomAiProfile[]
+}
+
+model IgnoringPrefix {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String
+
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
+
+  @@unique([guildId, name])
+  @@index([guildId])
+}
+
+model Channel {
+  id           String   @id @unique
+  createdAt    DateTime @default(now())
+  isGptChannel Boolean
+
+  fixedPrompt FixedPrompt[]
+
+  guild   Guild?  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String?
+
+  @@index([guildId])
+}
+
+model User {
+  id        String   @id @unique
+  createdAt DateTime @default(now())
+
+  fixedPrompt     FixedPrompt[]
+  customAiProfile CustomAiProfile[]
+}
+
+model FixedPrompt {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  prompt     String   @db.VarChar(2000)
+  isTemplate Boolean
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId String
+
+  @@unique([userId, channelId])
+  @@index([userId, channelId])
+}
+
+model FixedPromptTemplate {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String
+  message   String   @db.VarChar(2000)
+
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  guildId String
+
+  @@index([guildId])
+}
+
+model CustomAiProfile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  name   String
+  avatar String
+
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  guildId String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  @@unique([guildId, userId])
+  @@index([guildId, userId])
+}
