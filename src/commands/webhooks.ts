@@ -1,15 +1,15 @@
 import {
-  ChannelType,
-  CommandInteraction,
-  CommandInteractionOptionResolver,
-  PermissionFlagsBits,
-  SlashCommandBuilder,
-  TextChannel,
+	ChannelType,
+	CommandInteraction,
+	CommandInteractionOptionResolver,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+	TextChannel,
 } from "discord.js";
 import { readJson } from "json-helper-toolkit";
 
 import { usefulFuncs } from "../index";
-import { ConfigData, WebhookCustoms } from "../types/jsonData";
+import { ConfigData } from "../types/jsonData";
 import { isValidHttpUrl } from "../utils/utilFunctions";
 
 const commandDescriptions = {
@@ -45,18 +45,18 @@ module.exports = {
 		.setDefaultMemberPermissions(commandDescriptions.permissionLevel),
 
 	async execute(interaction: CommandInteraction) {
-		// It shouldn't work in DM messages.
+		// It shouldn't work in DMs.
 		if (interaction.channel?.type === ChannelType.DM) {
-			return interaction.reply("This command cannot be used in DM messages.");
+			return await interaction.reply({
+				content: "You cannot use this command in DM message! 🚫",
+			});
 		}
+		if (!interaction.guildId) return;
 
 		// Read subcommand name and required data.
 		const subCommand = (
 			interaction.options as CommandInteractionOptionResolver
 		).getSubcommand();
-		const [, webhookCustomsData] = readJson<WebhookCustoms>(
-			"data/webhookCustoms.json"
-		);
 		const [, configData] = readJson<ConfigData>("config.json");
 
 		const channel = usefulFuncs.getChannel(interaction.channelId);

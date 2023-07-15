@@ -3,19 +3,15 @@ import { readJson } from "json-helper-toolkit";
 import { ChatCompletionRequestMessage } from "openai";
 
 import { openai, usefulFuncs } from "../index";
+import { ConfigData } from "../types/jsonData";
 import {
-	ConfigData,
-	FixedPromptChannels,
-	GptChannel,
-	IgnoringPrefix,
-	ReplyMode,
-	WebhookCustoms,
-} from "../types/jsonData";
-import {
-	delay,
-	filterWebhookChannels,
-	sendWebhookMessage,
-} from "../utils/utilFunctions";
+	channel,
+	customAiProfile,
+	fixedPrompt,
+	prefix,
+	user,
+} from "../utils/prismaUtils";
+import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 
 interface ChatLog {
 	role: string;
@@ -52,36 +48,53 @@ const keepTyping = async (channel: TextChannel) => {
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message: Message) {
-		const [, data] = readJson<IgnoringPrefix>("data/ignoringPrefix.json");
-		const [, { channelList }] = readJson<GptChannel>("data/gptChannel.json");
+		// Get channel data from the database.
+		const isDM = message.channel?.type === ChannelType.DM;
+		const channelData = message.guildId
+			? await channel.findFirst(message.channelId, message.guildId)
+			: null;
 
 		// Prevent unwanted triggers.
 		if (message.author.bot) return;
 		if (message.content.length === 0) return;
-		if (message.author.id == process.env.DISCORD_CLIENT_ID) return;
-		for (let index = 0; index < data.prefix.length; index++) {
-			const onePrefix = data.prefix[index];
-			if (message.content.startsWith(onePrefix)) {
-				return;
+		if (message.author.id === process.env.DISCORD_CLIENT_ID) return;
+
+		if (message.guildId) {
+			const prefixData = message.guildId
+				? await prefix.findMany(message.guildId)
+				: null;
+
+			if (!isDM && message.guildId) {
+				if (prefixData) {
+					for (let index = 0; index < prefixData.length; index++) {
+						if (message.content.startsWith(prefixData[index].name)) {
+							return;
+						}
+					}
+				} else if (!prefixData && message.content.startsWith("!")) {
+					return;
+				}
+			} else if (isDM) {
+				if (message.content.startsWith("!")) {
+					return;
+				}
 			}
 		}
 
 		let isAvailableChannel = false;
-		for (let index = 0; index < channelList.length; index++) {
-			if (
-				message.channelId === channelList[index] ||
-				message.channel.type === ChannelType.DM
-			) {
-				isAvailableChannel = true;
-			}
+		if (
+			(channelData?.isGptChannel && message.channelId === channelData.id) ||
+			isDM
+		) {
+			isAvailableChannel = true;
+		} else if (!channelData?.isGptChannel && !isDM) {
+			isAvailableChannel = false;
 		}
-
 		message.mentions.users.forEach((one) => {
 			if (one.id === usefulFuncs.getClientUser()?.id) {
 				isAvailableChannel = true;
 			}
 		});
-
 		if (isAvailableChannel === false) {
 			return;
 		}
@@ -91,11 +104,11 @@ module.exports = {
 
 		// Show typing status.
 		isTyping = true;
-		const channel = message.channel as TextChannel;
-		executeAsync(keepTyping, channel);
+		const textChannel = message.channel as TextChannel;
+		executeAsync(keepTyping, textChannel);
 
 		const [, { aiInputLimit }] = readJson<ConfigData>("config.json");
-		const prevMessagesCollection: any = await channel.messages.fetch({
+		const prevMessagesCollection: any = await textChannel.messages.fetch({
 			limit: aiInputLimit,
 		});
 		const prevMessages = [...prevMessagesCollection];
@@ -134,45 +147,43 @@ module.exports = {
 				if (oneMsg.webhookId && message.guildId) {
 					// If the message was created with Webhooks.
 
-					const [, webhookCustomsData] = readJson<WebhookCustoms>(
-						"data/webhookCustoms.json"
+					const customAiProfileData = await customAiProfile.findFirst(
+						message.author.id,
+						message.guildId ?? undefined
 					);
 
-					if (!(Object.keys(webhookCustomsData).length < 1)) {
-						const validIndex = filterWebhookChannels(
-							webhookCustomsData,
-							{
-								one: undefined,
-								two: undefined,
-							},
-							message.author.id,
-							message.guildId
-						);
-
-						if (validIndex.one !== undefined && validIndex.two !== undefined) {
-							const validObj =
-								webhookCustomsData.arr[validIndex.one].preferredSettings[
-									validIndex.two
-								];
-
-							if (
-								oneMsg.guildId === validObj.serverId &&
-								oneMsg.author.username === validObj.name
-							) {
-								chatLog.push({
-									role: "assistant",
-									content: oneMsg.content,
-								});
-							}
+					if (customAiProfileData) {
+						if (
+							oneMsg.guildId === customAiProfileData.guildId &&
+							oneMsg.author.username === customAiProfileData.name
+						) {
+							chatLog.push({
+								role: "assistant",
+								content: oneMsg.content,
+							});
 						}
 					}
 				} else {
-					// If "oneMsg" is a message created by a user.
+					// If the message was created by a user.
 					let isContinue = false;
 
-					for (let index = 0; index < data.prefix.length; index++) {
-						const onePrefix = data.prefix[index];
-						if (oneMsg.content.startsWith(onePrefix)) {
+					// Prefix Check
+					if (!isDM && message.guildId) {
+						const prefixData = message.guildId
+							? await prefix.findMany(message.guildId)
+							: null;
+
+						if (prefixData) {
+							for (let index = 0; index < prefixData.length; index++) {
+								if (oneMsg.content.startsWith(prefixData[index].name)) {
+									isContinue = true;
+								}
+							}
+						} else if (message.content.startsWith("!")) {
+							isContinue = true;
+						}
+					} else if (isDM) {
+						if (oneMsg.content.startsWith("!")) {
 							isContinue = true;
 						}
 					}
@@ -186,7 +197,6 @@ module.exports = {
 						isContinue = true;
 					}
 
-					// "continue" when it's needed.
 					if (isContinue) {
 						continue;
 					}
@@ -200,43 +210,80 @@ module.exports = {
 		}
 
 		// If the user has their own fixed prompts, include it.
-		const [, fixedPromptData] = readJson<FixedPromptChannels>(
-			"data/fixedPrompt.json"
-		);
+		const fixedPromptData = message.guildId
+			? await fixedPrompt.findFirst(
+					message.channelId,
+					message.author.id,
+					message.guildId ?? undefined
+			  )
+			: null;
 
-		if (fixedPromptData[message.channelId + ""]) {
-			const channelDataArr = fixedPromptData[message.channelId + ""];
+		let editedFixedPromptData = fixedPromptData?.prompt;
 
-			let fixedPromptMsg = "";
+		if (editedFixedPromptData) {
+			// Show warning message when "predefinedMsg" is longer than 1950 letters.
+			if (
+				editedFixedPromptData !== "" &&
+				editedFixedPromptData.length >= 1950
+			) {
+				return message.channel.send(
+					"ERROR: predefined message cannot be more than 1950 letters!"
+				);
+			}
+		}
 
-			for (let index = 0; index < channelDataArr.length; index++) {
-				if (
-					channelDataArr[index] &&
-					channelDataArr[index].userid === message.author.id
-				) {
-					fixedPromptMsg = channelDataArr[index].prompt;
-				}
+		// Discord data for string replacements.
+		const userNickname = message.guildId
+			? usefulFuncs.getUser(message.guildId, message.author.id)?.nickname
+			: "{not-found}";
+		const foundNickname =
+			(userNickname
+				? userNickname
+				: await usefulFuncs.getUserGlobalName(message.author.id)) ||
+			"{not-found}";
+		const guildName = message.guildId
+			? usefulFuncs.getGuild(message.guildId)?.name
+			: "{not-found}";
+		const channelName = !isDM ? message.channel.name : "{not-found}";
+
+		if (fixedPromptData && editedFixedPromptData) {
+			// String replacements for fixed prompt messages.
+			while (editedFixedPromptData.includes("{user}")) {
+				editedFixedPromptData = editedFixedPromptData.replace(
+					"{user}",
+					foundNickname
+				);
+			}
+			while (guildName && editedFixedPromptData.includes("{server}")) {
+				editedFixedPromptData = editedFixedPromptData.replace(
+					"{server}",
+					guildName
+				);
+			}
+			while (editedFixedPromptData.includes("{channel}")) {
+				editedFixedPromptData = editedFixedPromptData.replace(
+					"{channel}",
+					channelName
+				);
 			}
 
-			if (fixedPromptMsg !== "") {
-				if (chatLog.length >= 2) {
-					chatLog = [
-						...chatLog.slice(0, chatLog.length - 2),
-						{
-							role: "system",
-							content: fixedPromptMsg,
-						},
-						...chatLog.slice(chatLog.length - 2, chatLog.length),
-					];
-				} else if (chatLog.length < 2) {
-					chatLog = [
-						{
-							role: "system",
-							content: fixedPromptMsg,
-						},
-						...chatLog,
-					];
-				}
+			if (chatLog.length >= 2) {
+				chatLog = [
+					...chatLog.slice(0, chatLog.length - 2),
+					{
+						role: "system",
+						content: editedFixedPromptData,
+					},
+					...chatLog.slice(chatLog.length - 2, chatLog.length),
+				];
+			} else if (chatLog.length < 2) {
+				chatLog = [
+					{
+						role: "system",
+						content: editedFixedPromptData,
+					},
+					...chatLog,
+				];
 			}
 		}
 
@@ -254,34 +301,22 @@ module.exports = {
 					console.log(`OPENAI ERR: ${error}`);
 				});
 
-			if (result && result !== undefined) {
+			if (result) {
 				const { message: reply }: Choice = result.data.choices[0] as Choice;
 
-				// Detect the user's reply mode.
-				const [, replyModeData] = readJson<ReplyMode>("data/replyMode.json");
-				const replyMode = replyModeData[message.author.id + ""];
-
-				// Reply Function
 				const doReply = async (inputMessage: string) => {
-					const [, WebhookCustomsData] = readJson<WebhookCustoms>(
-						"data/webhookCustoms.json"
-					);
+					const customAiProfileData = message.guildId
+						? await customAiProfile.findFirst(
+								message.author.id,
+								message.guildId
+						  )
+						: null;
 
-					let isExist = false;
-
-					if (WebhookCustomsData.arr) {
-						isExist = WebhookCustomsData.arr.some(
-							(one) =>
-								one?.userid === message.author.id &&
-								one?.preferredSettings.length !== 0
-						);
-					} else {
-						isExist = false;
-					}
-
-					if (isExist && message.guildId && !message.webhookId) {
+					if (customAiProfileData && !message.webhookId && message.guildId) {
 						isTyping = false;
-						const tempMsg = await message.channel.send("Processing...");
+
+						const tempMsg = await message.channel.send("[Processing...]");
+
 						await sendWebhookMessage({
 							guildId: message.guildId,
 							userId: message.author.id,
@@ -292,29 +327,10 @@ module.exports = {
 							console.log(e);
 						});
 					} else {
-						switch (replyMode) {
-							case Number(ReplyModeList.replyWithoutMention):
-								message
-									.reply({
-										content: inputMessage,
-										allowedMentions: { repliedUser: false },
-									})
-									.catch((error) => {
-										isTyping = false;
-										console.log(error);
-									});
-								break;
-							case Number(ReplyModeList.withoutReply):
-								usefulFuncs.sendMessage(message.channelId, inputMessage);
-								break;
-
-							default:
-								message.reply(inputMessage).catch((error) => {
-									isTyping = false;
-									console.log(error);
-								});
-								break;
-						}
+						message.reply(inputMessage).catch((error) => {
+							isTyping = false;
+							console.log(error);
+						});
 					}
 				};
 

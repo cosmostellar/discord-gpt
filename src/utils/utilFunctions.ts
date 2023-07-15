@@ -1,15 +1,9 @@
 import { TextChannel } from "discord.js";
 import { readJson } from "json-helper-toolkit";
-import fs from "node:fs";
-import path from "node:path";
 
 import { usefulFuncs } from "../";
-import {
-	ConfigData,
-	GptChannel,
-	IgnoringPrefix,
-	WebhookCustoms,
-} from "../types/jsonData";
+import { ConfigData } from "../types/jsonData";
+import { customAiProfile } from "./prismaUtils";
 
 export const delay = (ms: number) => {
 	//* Delay Function
@@ -41,63 +35,43 @@ export const sendWebhookMessage = async ({
 	channelId,
 	content,
 }: SendWebhookMessageArgs) => {
-	const [, webhookCustomsData] = readJson<WebhookCustoms>(
-		"data/webhookCustoms.json"
-	);
+	const customAiProfileData = await customAiProfile.findFirst(userId, guildId);
 
-	let validIndex: ValidIndex = {
-		one: undefined,
-		two: undefined,
-	};
+	const client = usefulFuncs.getClient();
+	const channel = client.channels.cache.get(channelId) as TextChannel;
 
-	const func = filterWebhookChannels(
-		webhookCustomsData,
-		validIndex,
-		userId,
-		guildId
-	);
-
-	validIndex.one = func.one;
-	validIndex.two = func.two;
-
-	if (validIndex.one !== undefined && validIndex.two !== undefined) {
-		const validObj =
-			webhookCustomsData.arr[validIndex.one].preferredSettings[validIndex.two];
-
-		const client = usefulFuncs.getClient();
-
-		const channel = client.channels.cache.get(channelId) as TextChannel;
-
+	if (customAiProfileData) {
 		if (channel instanceof TextChannel) {
-			if (!isValidHttpUrl(validObj.avatar)) {
+			if (!isValidHttpUrl(customAiProfileData.avatar)) {
 				usefulFuncs.sendMessage(channel.id, "Image URL is not valid.");
 				return;
 			}
 
 			const webhooks = await channel.fetchWebhooks();
-
 			const [, configData] = readJson<ConfigData>("config.json");
-			try {
-				let isSent = false;
-				webhooks.map(async (webhook) => {
-					if (webhook.name === configData.webhookName) {
+
+			let isSent = false;
+			if (configData) {
+				webhooks?.map(async (webhook) => {
+					if (
+						webhook.name === configData.webhookName &&
+						webhook.owner?.id === client.user?.id
+					) {
 						webhook.send({
 							content,
-							username: validObj.name,
-							avatarURL: validObj.avatar,
+							username: customAiProfileData.name,
+							avatarURL: customAiProfileData.avatar,
 						});
 						isSent = true;
 					}
 				});
+			}
 
-				if (!isSent) {
-					usefulFuncs.sendMessage(
-						channel.id,
-						"Webhook is not found. Please add one in this channel."
-					);
-				}
-			} catch (error) {
-				usefulFuncs.sendMessage(channel.id, "Please try again later.");
+			if (!isSent) {
+				usefulFuncs.sendMessage(
+					channel.id,
+					"Webhook is not found. Please add one in this channel."
+				);
 			}
 		}
 	}
@@ -152,107 +126,4 @@ export const sendSimpleWebhook = async ({
 			usefulFuncs.sendMessage(channel.id, "Please try again later.");
 		}
 	}
-};
-
-interface ValidIndex {
-	one: number | undefined;
-	two: number | undefined;
-}
-
-export const filterWebhookChannels = (
-	webhookCustomsData: WebhookCustoms,
-	validIndexObj: ValidIndex,
-	userId: string,
-	guildId: string
-) => {
-	if (webhookCustomsData.arr) {
-		webhookCustomsData.arr.filter((oneObj, oneDataIndex) => {
-			let isValid = false;
-
-			if (!(Object.keys(webhookCustomsData).length < 1)) {
-				oneObj.preferredSettings.forEach(
-					(preferredSetting, preferredSettingIndex) => {
-						if (
-							preferredSetting &&
-							oneObj.userid === userId &&
-							preferredSetting.serverId === guildId
-						) {
-							isValid = true;
-							validIndexObj = {
-								one: oneDataIndex,
-								two: preferredSettingIndex,
-							};
-						}
-					}
-				);
-			}
-
-			return isValid;
-		});
-	}
-
-	return validIndexObj;
-};
-
-const getPath = (input: string) => {
-	const dataDir = path.resolve(process.cwd() + "/data/" + input);
-
-	return dataDir;
-};
-
-interface GenerationQueue {
-	path: string;
-	object: any;
-}
-
-interface ObjectDefaults {
-	emptyObject: {};
-	gptChannel: GptChannel;
-	ignoringPrefix: IgnoringPrefix;
-	webhookCustoms: WebhookCustoms;
-}
-
-export const generateJsonData = () => {
-	const objectDefaults: ObjectDefaults = {
-		emptyObject: {},
-		gptChannel: {
-			channelList: [],
-		},
-		ignoringPrefix: {
-			prefix: [],
-		},
-		webhookCustoms: {
-			arr: [],
-		},
-	};
-
-	const generationQueue: GenerationQueue[] = [
-		{
-			path: getPath("fixedPrompt.json"),
-			object: objectDefaults.emptyObject,
-		},
-		{
-			path: getPath("gptChannel.json"),
-			object: objectDefaults.gptChannel,
-		},
-		{
-			path: getPath("ignoringPrefix.json"),
-			object: objectDefaults.ignoringPrefix,
-		},
-		{
-			path: getPath("replyMode.json"),
-			object: objectDefaults.emptyObject,
-		},
-		{
-			path: getPath("webhookCustoms.json"),
-			object: objectDefaults.webhookCustoms,
-		},
-	];
-
-	generationQueue.forEach((one) => {
-		if (!fs.existsSync(one.path)) {
-			const stringified = JSON.stringify(one.object);
-			fs.writeFileSync(one.path, stringified);
-		}
-	});
 };
