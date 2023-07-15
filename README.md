@@ -1,5 +1,5 @@
 # discord-gpt
-> This `json-version` code creates json files to save user data. It's separated from the main branch, which is implemented with an ORM.
+> This `json-version` code creates json files to save user data. It's separated from the [main](https://github.com/decaplanet/discord-gpt) branch, which is implemented with an ORM.
 
 A discordjs bot that allows you to use gpt chatbots in discord! This bot not only allows each user to personalize their own bot names and profile images using webhooks but also provides a range of useful features to enhance your experience.
 
