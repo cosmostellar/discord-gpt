@@ -37,110 +37,73 @@ module.exports = {
 		const subCommand = (
 			interaction.options as CommandInteractionOptionResolver
 		).getSubcommand();
+		let isEnable: boolean;
 
-		switch (subCommand) {
-			case "add":
-				{
-					await interaction.deferReply({ ephemeral: true });
+		if (subCommand === "add") {
+			isEnable = true;
+		} else {
+			isEnable = false;
+		}
 
-					let isSuccessful = false;
+		if (isEnable !== null) {
+			await interaction.deferReply({ ephemeral: true });
 
-					const existingChannel = await channel.findFirst(
-						interaction.channelId,
-						interaction.guildId
-					);
+			let isSuccessful = false;
 
-					if (existingChannel) {
-						const updatedChannel = await channel.updateGptChannel(
-							interaction.channelId,
-							{
-								isGptChannel: true,
-							},
-							interaction.guildId
-						);
-						if (updatedChannel) {
-							isSuccessful = true;
-						}
-					} else if (!existingChannel) {
-						const createdChannel = await channel.create(
-							interaction.channelId,
-							interaction.guildId
-						);
+			const existingChannel = await channel.findFirst(
+				interaction.channelId,
+				interaction.guildId
+			);
 
-						if (createdChannel && createdChannel.guildId) {
-							const updatedChannel = await channel.updateGptChannel(
-								createdChannel.id,
-								{
-									isGptChannel: true,
-								},
-								createdChannel.guildId
-							);
-						}
-
-						if (createdChannel) {
-							isSuccessful = true;
-						}
-					}
-
-					if (isSuccessful) {
-						return await interaction.editReply({
-							content: "This channel is now a GPT channel! 🤖",
-						});
-					} else {
-						return await interaction.editReply({
-							content: "Please try again later. 😢",
-						});
-					}
+			if (existingChannel) {
+				const updatedChannel = await channel.updateGptChannel(
+					interaction.channelId,
+					{
+						isGptChannel: isEnable,
+					},
+					interaction.guildId
+				);
+				if (updatedChannel) {
+					isSuccessful = true;
 				}
-				break;
+			} else if (!existingChannel) {
+				const createdChannel = await channel.create(
+					interaction.channelId,
+					interaction.guildId
+				);
 
-			case "remove":
-				{
-					await interaction.deferReply({ ephemeral: true });
-
-					let isSuccessful = false;
-
-					const existingChannel = await channel.findFirst(
-						interaction.channelId,
-						interaction.guildId
+				if (createdChannel && createdChannel.guildId) {
+					const updatedChannel = await channel.updateGptChannel(
+						createdChannel.id,
+						{
+							isGptChannel: true,
+						},
+						createdChannel.guildId
 					);
-
-					if (existingChannel) {
-						const updatedChannel = await channel.updateGptChannel(
-							interaction.channelId,
-							{
-								isGptChannel: true,
-							},
-							interaction.guildId
-						);
-						if (updatedChannel) {
-							isSuccessful = true;
-						}
-					} else {
-						const createdChannel = await channel.create(
-							interaction.channelId,
-							interaction.guildId
-						);
-
-						if (createdChannel) {
-							isSuccessful = true;
-						}
-					}
-
-					if (isSuccessful) {
-						return await interaction.editReply({
-							content: "This channel is no longer a GPT channel! 🤖",
-						});
-					} else {
-						return await interaction.editReply({
-							content: "Please try again later. 😢",
-						});
-					}
 				}
-				break;
 
-			default:
-				break;
+				if (createdChannel) {
+					isSuccessful = true;
+				}
+			}
+
+			if (isSuccessful) {
+				if (isEnable) {
+					return await interaction.editReply({
+						content: "This channel is now a GPT channel! 🤖",
+					});
+				} else if (!isEnable) {
+					return await interaction.editReply({
+						content: "This channel is no longer a GPT channel! 🤖",
+					});
+				}
+			} else {
+				if (isEnable) {
+					return await interaction.editReply({
+						content: "Please try again later. 😢",
+					});
+				}
+			}
 		}
 	},
 };
