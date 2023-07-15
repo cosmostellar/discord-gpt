@@ -260,7 +260,7 @@ module.exports = {
 
 							if (
 								selectedTemplate &&
-								(pickedIndex < 1 || pickedIndex >= guildTemplates.length)
+								(pickedIndex > 0 || pickedIndex < guildTemplates.length)
 							) {
 								let isSuccessful = false;
 
