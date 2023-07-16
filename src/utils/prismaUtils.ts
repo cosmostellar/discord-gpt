@@ -31,6 +31,21 @@ const guild = {
 			})) ?? null
 		);
 	},
+	delete: async (guildId: string) => {
+		const existingGuild = await guild.findFirst(guildId);
+
+		if (existingGuild) {
+			return (
+				(await client.guild.delete({
+					where: {
+						id: existingGuild.id,
+					},
+				})) ?? null
+			);
+		} else {
+			return null;
+		}
+	},
 };
 
 const channel = {
@@ -118,6 +133,21 @@ const channel = {
 					},
 					data: {
 						isGptChannel: args.isGptChannel,
+					},
+				})) ?? null
+			);
+		} else {
+			return null;
+		}
+	},
+	delete: async (channelId: string) => {
+		const existingChannel = await getExisting.getExistingChannel(channelId);
+
+		if (existingChannel) {
+			return (
+				(await client.channel.delete({
+					where: {
+						id: existingChannel.id,
 					},
 				})) ?? null
 			);
