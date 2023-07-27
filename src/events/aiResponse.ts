@@ -26,12 +26,6 @@ interface Choice {
 	index: number;
 }
 
-export enum ReplyModeList {
-	"reply",
-	"replyWithoutMention",
-	"withoutReply",
-}
-
 let isTyping = false;
 
 function executeAsync(func: Function, channel: TextChannel) {
