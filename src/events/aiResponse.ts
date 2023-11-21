@@ -14,6 +14,189 @@ import { ConfigData } from "../types/jsonData";
 import * as prismaUtils from "../utils/prismaUtils";
 import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 
+module.exports = {
+    name: Events.MessageCreate,
+    async execute(message: Message) {
+        // Get channel data from the database.
+        const isDM = message.channel?.type === ChannelType.DM;
+
+        // Prevent unwanted triggers.
+        if (message.guildId && !isDM) {
+            const permissions = (
+                message.channel as GuildChannel
+            ).permissionsFor(message.client.user!);
+            if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
+                return;
+            }
+        }
+        if (message.author.bot) return;
+        if (message.content.length === 0) return;
+        if (message.author.id === process.env.DISCORD_CLIENT_ID) return;
+
+        // Not answer when the message starts with a prefix.
+        if (isDM) {
+            if (message.content.startsWith("!")) {
+                return;
+            }
+        } else if (message.guildId && !isDM) {
+            const prefixData = message.guildId
+                ? await prismaUtils.prefix.findMany(message.guildId)
+                : null;
+
+            if (!prefixData && message.content.startsWith("!")) {
+                return;
+            } else if (prefixData) {
+                for (let index = 0; index < prefixData.length; index++) {
+                    if (message.content.startsWith(prefixData[index].name)) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        const isAvailableChannel = await checkAvailability(message, isDM);
+        if (isAvailableChannel === false) {
+            return;
+        }
+
+        // Show typing status.
+        isTyping = true;
+        const textChannel = message.channel;
+        if (!(textChannel instanceof TextChannel)) return;
+        executeAsync(keepTyping, textChannel);
+
+        // Get previous messages.
+        const [, { aiInputLimit }] = readJson<ConfigData>("config.json");
+        if (!aiInputLimit) return;
+
+        const prevMessagesCollection = await textChannel.messages.fetch({
+            limit: aiInputLimit,
+        });
+        const prevMessages = [...prevMessagesCollection];
+        if (prevMessages.length === 0) {
+            isTyping = false;
+            return;
+        }
+
+        // Traverse messages and only keep required ones.
+        prevMessages.reverse();
+        let chatLog = await getChatLog(message, prevMessages, isDM);
+
+        // If the user has their own fixed prompts, include it.
+        const fixedPromptData = message.guildId
+            ? await prismaUtils.fixedPrompt.findFirst(
+                  message.channelId,
+                  message.author.id,
+                  message.guildId ?? undefined
+              )
+            : null;
+        let fixedPrompt = fixedPromptData?.prompt;
+        if (fixedPrompt) {
+            // Show warning message when "predefinedMsg" is longer than 1950 letters.
+            if (fixedPrompt !== "" && fixedPrompt.length >= 1950) {
+                return message.channel.send(
+                    "ERROR: Fixed prompt message cannot be empty or more than 1950 letters!"
+                );
+            }
+        }
+
+        // Replace placeholders.
+        const userNickname = message.guildId
+            ? utilFunctions.getUserCache(message.guildId, message.author.id)
+                  ?.nickname
+            : "{not-found}";
+        const foundNickname =
+            (userNickname
+                ? userNickname
+                : await utilFunctions.getUserGlobalName(message.author.id)) ||
+            "{not-found}";
+        const guildName = message.guildId
+            ? utilFunctions.getGuildCache(message.guildId)?.name
+            : "{not-found}";
+        const channelName = !isDM ? message.channel.name : "{not-found}";
+
+        if (fixedPromptData && fixedPrompt) {
+            // String replacements for fixed prompt messages.
+            while (fixedPrompt.includes("{user}")) {
+                fixedPrompt = fixedPrompt.replace("{user}", foundNickname);
+            }
+            while (guildName && fixedPrompt.includes("{server}")) {
+                fixedPrompt = fixedPrompt.replace("{server}", guildName);
+            }
+            while (fixedPrompt.includes("{channel}")) {
+                fixedPrompt = fixedPrompt.replace("{channel}", channelName);
+            }
+
+            if (chatLog.length >= 2) {
+                chatLog = [
+                    ...chatLog.slice(0, chatLog.length - 2),
+                    {
+                        role: "system",
+                        content: fixedPrompt,
+                    },
+                    ...chatLog.slice(chatLog.length - 2, chatLog.length),
+                ];
+            } else if (chatLog.length < 2) {
+                chatLog = [
+                    {
+                        role: "system",
+                        content: fixedPrompt,
+                    },
+                    ...chatLog,
+                ];
+            }
+        }
+
+        // Get a response from AI.
+        const result = await openai
+            .createChatCompletion({
+                model: "gpt-3.5-turbo",
+                messages: chatLog as ChatCompletionRequestMessage[],
+            })
+            .catch((error) => {
+                isTyping = false;
+                replyMessage(message, "Please try again later.");
+                console.log(`OPENAI ERR: ${error}`);
+            });
+        if (!result) {
+            return replyMessage(message, "Please try again later.");
+        }
+
+        interface Choice {
+            message: {
+                role: string;
+                content: string;
+            };
+            finish_reason: string;
+            index: number;
+        }
+        const { message: reply }: Choice = result.data.choices[0] as Choice;
+
+        // Send Reply. If the answer's too long. Separate them into multiple messages.
+        if (reply.content.length >= 1999) {
+            const answerList = getAnswerList(reply);
+
+            try {
+                for (let index = 0; index < answerList.length; index++) {
+                    replyMessage(message, answerList[index]);
+                }
+            } catch (error) {
+                isTyping = false;
+                console.log(`ERR: ${error}`);
+            }
+        } else {
+            try {
+                replyMessage(message, reply.content);
+            } catch (error) {
+                isTyping = false;
+                console.log(`ERR: ${error}`);
+            }
+        }
+
+        isTyping = false;
+    },
+};
+
 const executeAsync = (func: Function, channel: TextChannel) => {
     setTimeout(func, 0, channel);
 };
@@ -227,187 +410,4 @@ const getAnswerList = (reply: Reply) => {
     }
 
     return answerList;
-};
-
-module.exports = {
-    name: Events.MessageCreate,
-    async execute(message: Message) {
-        // Get channel data from the database.
-        const isDM = message.channel?.type === ChannelType.DM;
-
-        // Prevent unwanted triggers.
-        if (message.guildId && !isDM) {
-            const permissions = (
-                message.channel as GuildChannel
-            ).permissionsFor(message.client.user!);
-            if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
-                return;
-            }
-        }
-        if (message.author.bot) return;
-        if (message.content.length === 0) return;
-        if (message.author.id === process.env.DISCORD_CLIENT_ID) return;
-
-        // Not answer when the message starts with a prefix.
-        if (isDM) {
-            if (message.content.startsWith("!")) {
-                return;
-            }
-        } else if (message.guildId && !isDM) {
-            const prefixData = message.guildId
-                ? await prismaUtils.prefix.findMany(message.guildId)
-                : null;
-
-            if (!prefixData && message.content.startsWith("!")) {
-                return;
-            } else if (prefixData) {
-                for (let index = 0; index < prefixData.length; index++) {
-                    if (message.content.startsWith(prefixData[index].name)) {
-                        return;
-                    }
-                }
-            }
-        }
-
-        const isAvailableChannel = await checkAvailability(message, isDM);
-        if (isAvailableChannel === false) {
-            return;
-        }
-
-        // Show typing status.
-        isTyping = true;
-        const textChannel = message.channel;
-        if (!(textChannel instanceof TextChannel)) return;
-        executeAsync(keepTyping, textChannel);
-
-        // Get previous messages.
-        const [, { aiInputLimit }] = readJson<ConfigData>("config.json");
-        if (!aiInputLimit) return;
-
-        const prevMessagesCollection = await textChannel.messages.fetch({
-            limit: aiInputLimit,
-        });
-        const prevMessages = [...prevMessagesCollection];
-        if (prevMessages.length === 0) {
-            isTyping = false;
-            return;
-        }
-
-        // Traverse messages and only keep required ones.
-        prevMessages.reverse();
-        let chatLog = await getChatLog(message, prevMessages, isDM);
-
-        // If the user has their own fixed prompts, include it.
-        const fixedPromptData = message.guildId
-            ? await prismaUtils.fixedPrompt.findFirst(
-                  message.channelId,
-                  message.author.id,
-                  message.guildId ?? undefined
-              )
-            : null;
-        let fixedPrompt = fixedPromptData?.prompt;
-        if (fixedPrompt) {
-            // Show warning message when "predefinedMsg" is longer than 1950 letters.
-            if (fixedPrompt !== "" && fixedPrompt.length >= 1950) {
-                return message.channel.send(
-                    "ERROR: Fixed prompt message cannot be empty or more than 1950 letters!"
-                );
-            }
-        }
-
-        // Replace placeholders.
-        const userNickname = message.guildId
-            ? utilFunctions.getUserCache(message.guildId, message.author.id)
-                  ?.nickname
-            : "{not-found}";
-        const foundNickname =
-            (userNickname
-                ? userNickname
-                : await utilFunctions.getUserGlobalName(message.author.id)) ||
-            "{not-found}";
-        const guildName = message.guildId
-            ? utilFunctions.getGuildCache(message.guildId)?.name
-            : "{not-found}";
-        const channelName = !isDM ? message.channel.name : "{not-found}";
-
-        if (fixedPromptData && fixedPrompt) {
-            // String replacements for fixed prompt messages.
-            while (fixedPrompt.includes("{user}")) {
-                fixedPrompt = fixedPrompt.replace("{user}", foundNickname);
-            }
-            while (guildName && fixedPrompt.includes("{server}")) {
-                fixedPrompt = fixedPrompt.replace("{server}", guildName);
-            }
-            while (fixedPrompt.includes("{channel}")) {
-                fixedPrompt = fixedPrompt.replace("{channel}", channelName);
-            }
-
-            if (chatLog.length >= 2) {
-                chatLog = [
-                    ...chatLog.slice(0, chatLog.length - 2),
-                    {
-                        role: "system",
-                        content: fixedPrompt,
-                    },
-                    ...chatLog.slice(chatLog.length - 2, chatLog.length),
-                ];
-            } else if (chatLog.length < 2) {
-                chatLog = [
-                    {
-                        role: "system",
-                        content: fixedPrompt,
-                    },
-                    ...chatLog,
-                ];
-            }
-        }
-
-        // Get a response from AI.
-        const result = await openai
-            .createChatCompletion({
-                model: "gpt-3.5-turbo",
-                messages: chatLog as ChatCompletionRequestMessage[],
-            })
-            .catch((error) => {
-                isTyping = false;
-                replyMessage(message, "Please try again later.");
-                console.log(`OPENAI ERR: ${error}`);
-            });
-        if (!result) {
-            return replyMessage(message, "Please try again later.");
-        }
-
-        interface Choice {
-            message: {
-                role: string;
-                content: string;
-            };
-            finish_reason: string;
-            index: number;
-        }
-        const { message: reply }: Choice = result.data.choices[0] as Choice;
-
-        // Send Reply. If the answer's too long. Separate them into multiple messages.
-        if (reply.content.length >= 1999) {
-            const answerList = getAnswerList(reply);
-
-            try {
-                for (let index = 0; index < answerList.length; index++) {
-                    replyMessage(message, answerList[index]);
-                }
-            } catch (error) {
-                isTyping = false;
-                console.log(`ERR: ${error}`);
-            }
-        } else {
-            try {
-                replyMessage(message, reply.content);
-            } catch (error) {
-                isTyping = false;
-                console.log(`ERR: ${error}`);
-            }
-        }
-
-        isTyping = false;
-    },
 };
