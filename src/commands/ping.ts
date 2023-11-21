@@ -1,6 +1,6 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
-import { usefulFuncs } from "../";
+import { utilFunctions } from "../";
 
 module.exports = {
     data: new SlashCommandBuilder()

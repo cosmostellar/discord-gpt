@@ -13,7 +13,6 @@ import * as path from "path";
 
 dotenv.config();
 
-// Client Instance
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -24,37 +23,27 @@ const client = new Client({
     partials: [Partials.Channel],
 });
 
-// Command Registration
-const commandProcess = () => {
+const registerCommands = () => {
     const commandsPath = path.join(__dirname, "commands");
-
-    // Skip the function process when the directory doesn't exist.
-    try {
-        fs.readdirSync(commandsPath);
-    } catch (error) {
-        return;
-    }
-
     client.commands = new Collection();
 
     const commandFiles = fs
         .readdirSync(commandsPath)
         .filter((file) => file.endsWith(".js"));
 
-    for (const file of commandFiles) {
+    commandFiles.forEach((file) => {
         const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
+        const commandFile = require(filePath);
 
-        // The "if statement" below checks whether each command file
-        // has a valid exporting object.
-        if ("data" in command && "execute" in command) {
-            client.commands.set(command.data.name, command);
+        // Check whether the command file has a valid exported object.
+        if ("data" in commandFile && "execute" in commandFile) {
+            client.commands.set(commandFile.data.name, commandFile);
         } else {
-            console.log(
-                `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+            throw new Error(
+                `Command file at ${filePath} is missing a required property. ("data" and "execute")`
             );
         }
-    }
+    });
 
     client.on(Events.InteractionCreate, async (interaction) => {
         if (!interaction.isChatInputCommand()) return;
@@ -64,43 +53,26 @@ const commandProcess = () => {
         );
 
         if (!command) {
-            console.error(
-                `No command matching ${interaction.commandName} was found.`
+            throw new Error(
+                `No command with a matching name ${interaction.commandName} was found.`
             );
-            return;
         }
 
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.log(error);
-            await interaction.reply({
-                content: "There was an error while executing this command!",
-                ephemeral: true,
-            });
-        }
+        await command.execute(interaction);
     });
 };
+registerCommands();
 
-commandProcess();
-
-// Event Registration
-const eventProcess = function () {
+const registerProcess = function () {
     const eventsPath = path.join(__dirname, "events");
 
-    // Skip the function process when the directory doesn't exist.
-    try {
-        fs.readdirSync(eventsPath);
-    } catch (error) {
-        console.log(error);
-        return;
-    }
+    fs.readdirSync(eventsPath);
 
     const eventFiles = fs
         .readdirSync(eventsPath)
         .filter((file) => file.endsWith(".js"));
 
-    for (const file of eventFiles) {
+    eventFiles.forEach((file) => {
         const filePath = path.join(eventsPath, file);
         const event = require(filePath);
 
@@ -109,12 +81,11 @@ const eventProcess = function () {
         } else {
             client.on(event.name, (...args) => event.execute(...args));
         }
-    }
+    });
 };
+registerProcess();
 
-eventProcess();
-
-export const usefulFuncs = {
+export const utilFunctions = {
     getClient: () => {
         return client;
     },
@@ -176,10 +147,10 @@ export const usefulFuncs = {
     },
 };
 
-// openai Configuration
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-export const openai = new OpenAIApi(configuration);
+export const openai = new OpenAIApi(
+    new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+    })
+);
 
 client.login(process.env.DISCORD_BOT_TOKEN);

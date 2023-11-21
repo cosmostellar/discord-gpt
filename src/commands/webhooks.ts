@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { readJson } from "json-helper-toolkit";
 
-import { usefulFuncs } from "../index";
+import { utilFunctions } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { isValidHttpUrl } from "../utils/utilFunctions";
 
@@ -59,7 +59,7 @@ module.exports = {
         ).getSubcommand();
         const [, configData] = readJson<ConfigData>("config.json");
 
-        const channel = usefulFuncs.getChannel(interaction.channelId);
+        const channel = utilFunctions.getChannel(interaction.channelId);
 
         switch (subCommand) {
             case commandDescriptions.subcommands[0].name:
@@ -73,7 +73,7 @@ module.exports = {
                         if (oneWebhook.name === configData.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
-                                usefulFuncs.getClientUser()?.id
+                                utilFunctions.getClientUser()?.id
                             ) {
                                 isExisting = true;
                             } else {
@@ -111,7 +111,7 @@ module.exports = {
                         if (oneWebhook.name === configData.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
-                                usefulFuncs.getClientUser()?.id
+                                utilFunctions.getClientUser()?.id
                             ) {
                                 oneWebhook.delete().catch((e) => {
                                     console.log(e);
