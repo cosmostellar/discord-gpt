@@ -86,9 +86,6 @@ const registerProcess = function () {
 registerProcess();
 
 export const utilFunctions = {
-    getClient: () => {
-        return client;
-    },
     getGuildCache: (guildId: string) => {
         return client.guilds.cache.get(guildId);
     },

@@ -39,8 +39,7 @@ export const sendWebhookMessage = async ({
         guildId
     );
 
-    const client = utilFunctions.getClient();
-    const channel = client.channels.cache.get(channelId);
+    const channel = utilFunctions.getChannelCache(channelId);
 
     if (customAiProfileData && channel instanceof TextChannel) {
         if (!isValidHttpUrl(customAiProfileData.avatar)) {
@@ -58,7 +57,7 @@ export const sendWebhookMessage = async ({
             webhooks?.map((webhook) => {
                 if (
                     webhook.name === configData.webhookName &&
-                    webhook.owner?.id === client.user?.id
+                    webhook.owner?.id === utilFunctions.getClientUser()?.id
                 ) {
                     webhook.send({
                         content,
@@ -96,8 +95,7 @@ export const sendSimpleWebhook = async ({
     webhookName,
     webhookImg,
 }: sendWebhookArgs) => {
-    const client = utilFunctions.getClient();
-    const channel = client.channels.cache.get(channelId);
+    const channel = utilFunctions.getChannelCache(channelId);
 
     if (channel instanceof TextChannel) {
         if (!isValidHttpUrl(webhookImg)) {
