@@ -116,7 +116,7 @@ const getChatLog = async (
             readingMessage.author.id === utilFunctions.getClientUser()?.id &&
             !readingMessage.webhookId
         ) {
-            //* If the message was created by the chatbot.
+            // If the message was created by the chatbot.
             if (!readingMessage.reference?.messageId) {
                 continue;
             }
@@ -135,7 +135,7 @@ const getChatLog = async (
             });
         } else {
             if (readingMessage.webhookId && message.guildId) {
-                //* If the message was created with Webhooks.
+                // If the message was created with Webhooks.
 
                 const customAiProfileData =
                     await prismaUtils.customAiProfile.findFirst(
@@ -158,8 +158,6 @@ const getChatLog = async (
                 }
             } else {
                 // Continue if the message was created by a user.
-
-                // Prefix Check
                 if (isDM) {
                     if (readingMessage.content.startsWith("!")) {
                         continue;
@@ -317,7 +315,7 @@ module.exports = {
             }
         }
 
-        // Placeholder replacements.
+        // Replace placeholders.
         const userNickname = message.guildId
             ? utilFunctions.getUserCache(message.guildId, message.author.id)
                   ?.nickname
