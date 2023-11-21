@@ -47,19 +47,7 @@ Checks the ping.
 | /ping   | (None)   |
 
 
-## Setup Guide
-To get the bot started, you need to set up the following environment variables.
-
-### Environment Variables
-| name              | type   |
-| ----------------- | ------ |
-| DISCORD_BOT_TOKEN | String |
-| DISCORD_CLIENT_ID | Number |
-| DISCORD_GUILD_ID  | Number |
-| OPENAI_API_KEY    | String |
-| DATABASE_URL      | String |
-
-### `package.json` Scripts
+## `package.json` Scripts
 | name                | description                                                                                                     |
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `start`             | Starts the code in the `build` directory.                                                                       |
