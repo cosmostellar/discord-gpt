@@ -4,11 +4,11 @@
     "description": "Talk to GPT-3 in discord!",
     "scripts": {
         "start": "node build/index.js",
-        "build": "tsc",
-        "dev:watch": "tsc --watch",
-        "dev:nodemon": "nodemon --exec node build/index.js --ignore data/**/*",
-        "cmd:deploy": "node scripts/deployCommands.js",
-        "cmd:deploy-global": "node scripts/deployGlobalCommands.js"
+        "dev:watch": "node --watch build/index.js",
+        "ts:build": "tsc",
+        "ts:watch": "tsc --watch",
+        "discord:deploy": "node scripts/deployCommands.js",
+        "discord:deploy-global": "node scripts/deployGlobalCommands.js"
     },
     "repository": {
         "type": "git",
