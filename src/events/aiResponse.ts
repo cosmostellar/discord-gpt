@@ -9,7 +9,7 @@ import {
 import { readJson } from "json-helper-toolkit";
 import { ChatCompletionRequestMessage } from "openai";
 
-import { openai, usefulFuncs } from "../index";
+import { openai, utilFunctions } from "../index";
 import { ConfigData } from "../types/jsonData";
 import {
     channel,
@@ -19,25 +19,10 @@ import {
 } from "../utils/prismaUtils";
 import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 
-interface ChatLog {
-    role: string;
-    content: string;
-}
-interface Choice {
-    message: {
-        role: string;
-        content: string;
-    };
-    finish_reason: string;
-    index: number;
-}
-
 let isTyping = false;
-
 function executeAsync(func: Function, channel: TextChannel) {
     setTimeout(func, 0, channel);
 }
-
 const keepTyping = async (channel: TextChannel) => {
     while (isTyping) {
         channel.sendTyping();
@@ -62,7 +47,6 @@ const doReply = async (
         discordMessage.guildId
     ) {
         isTyping = false;
-
         const tempMsg = await discordMessage.channel.send("[Processing...]");
 
         await sendWebhookMessage({
@@ -138,19 +122,24 @@ module.exports = {
             isAvailableChannel = false;
         }
         message.mentions.users.forEach((one) => {
-            if (one.id === usefulFuncs.getClientUser()?.id) {
+            if (one.id === utilFunctions.getClientUser()?.id) {
                 isAvailableChannel = true;
             }
         });
         // Answer the message if the bot was mentioned.
         // It still replies even if the channel is not a GPT channel.
         message.mentions.users.forEach((one) => {
-            if (one.id === usefulFuncs.getClientUser()?.id) {
+            if (one.id === utilFunctions.getClientUser()?.id) {
                 isAvailableChannel = true;
             }
         });
         if (isAvailableChannel === false) {
             return;
+        }
+
+        interface ChatLog {
+            role: string;
+            content: string;
         }
 
         // Read the latest messages and push required ones in an array named 'chatLog'.
@@ -178,7 +167,8 @@ module.exports = {
             const readingMessage: Message = prevMessages[i][1];
 
             if (
-                readingMessage.author.id === usefulFuncs.getClientUser()?.id &&
+                readingMessage.author.id ===
+                    utilFunctions.getClientUser()?.id &&
                 !readingMessage.webhookId
             ) {
                 //* If the message was created by the chatbot.
@@ -297,15 +287,16 @@ module.exports = {
 
         // Discord data for string replacements.
         const userNickname = message.guildId
-            ? usefulFuncs.getUser(message.guildId, message.author.id)?.nickname
+            ? utilFunctions.getUserCache(message.guildId, message.author.id)
+                  ?.nickname
             : "{not-found}";
         const foundNickname =
             (userNickname
                 ? userNickname
-                : await usefulFuncs.getUserGlobalName(message.author.id)) ||
+                : await utilFunctions.getUserGlobalName(message.author.id)) ||
             "{not-found}";
         const guildName = message.guildId
-            ? usefulFuncs.getGuild(message.guildId)?.name
+            ? utilFunctions.getGuildCache(message.guildId)?.name
             : "{not-found}";
         const channelName = !isDM ? message.channel.name : "{not-found}";
 
@@ -366,6 +357,15 @@ module.exports = {
 
             if (!result) {
                 return doReply(message, "Please try again later.");
+            }
+
+            interface Choice {
+                message: {
+                    role: string;
+                    content: string;
+                };
+                finish_reason: string;
+                index: number;
             }
 
             const { message: reply }: Choice = result.data.choices[0] as Choice;
