@@ -4,9 +4,9 @@
     "description": "Talk to GPT-3 in discord!",
     "scripts": {
         "start": "node build/index.js",
+        "build": "tsc",
+        "dev:ts": "tsc --watch",
         "dev:watch": "node --watch build/index.js",
-        "ts:build": "tsc",
-        "ts:watch": "tsc --watch",
         "discord:deploy": "node scripts/deployCommands.js",
         "discord:deploy-global": "node scripts/deployGlobalCommands.js"
     },
