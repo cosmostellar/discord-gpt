@@ -1,5 +1,5 @@
 # discord-gpt
-> This `json-version` code creates json files to save user data. It's separated from the [main](https://github.com/decaplanet/discord-gpt) branch, which is implemented with an ORM.
+> This `json-version` version creates json files to save user data. It's separated from the [main](https://github.com/decaplanet/discord-gpt) branch, which is implemented with an ORM.
 
 Discord bot that allows users to talk to gpt chatbots. The bot not only allows each user to personalize their own bot names and profile images using Discord webhooks, but also provides a range of useful features to enhance user experience.
 
@@ -47,18 +47,7 @@ Checks the ping.
 | /ping   | (None)   |
 
 
-## Setup Guide
-To get the bot started, you need to set up the following environment variables.
-
-### Environment Variables
-| name              | type   |     
-| ----------------- | ------ |
-| DISCORD_BOT_TOKEN | String |     
-| DISCORD_CLIENT_ID | Number |     
-| DISCORD_GUILD_ID  | Number |     
-| OPENAI_API_KEY    | String | 
-
-### `package.json` Scripts
+## `package.json` Scripts
 | name                | description                                                                                                     |
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `start`             | Starts the code in the `build` directory.                                                                       |
