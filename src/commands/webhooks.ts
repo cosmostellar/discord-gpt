@@ -59,7 +59,7 @@ module.exports = {
         ).getSubcommand();
         const [, configData] = readJson<ConfigData>("config.json");
 
-        const channel = utilFunctions.getChannel(interaction.channelId);
+        const channel = utilFunctions.getChannelCache(interaction.channelId);
 
         switch (subCommand) {
             case commandDescriptions.subcommands[0].name:

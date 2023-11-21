@@ -89,40 +89,37 @@ export const utilFunctions = {
     getClient: () => {
         return client;
     },
-    getGuild: (guildId: string) => {
+    getGuildCache: (guildId: string) => {
         return client.guilds.cache.get(guildId);
     },
-    getChannel: (channelId: string) => {
+    getChannelCache: (channelId: string) => {
         return client.channels.cache.get(channelId);
     },
-    getUser: (guildId: string, userId: string) => {
+    getUserCache: (guildId: string, userId: string) => {
         let guild = client.guilds.cache.get(guildId);
-        let member = guild?.members.cache.get(userId);
 
+        if (!guild) return;
+
+        let member = guild.members.cache.get(userId);
         return member;
     },
     sendMessage: async (channelId: string, msg: string) => {
-        if (channelId) {
-            const channel = client.channels.cache.get(channelId) as TextChannel;
+        const channel = client.channels.cache.get(channelId);
 
-            if (channel && msg) {
-                try {
-                    await channel?.send(msg);
-                } catch (err) {
-                    var tm = new Date().toString();
+        if (!(channel instanceof TextChannel)) return;
+        if (!channel) return;
 
-                    console.log("---- catch error occured ----");
-                    console.log("[" + tm + "]  " + err);
-                }
-            }
+        try {
+            await channel?.send(msg);
+        } catch (err) {
+            console.log(err);
         }
     },
     getClientChannel: (channelId: string) => {
         const channel = client.channels.cache.get(channelId);
 
-        if (channel) {
-            return channel;
-        }
+        if (!channel) return;
+        return channel;
     },
     getClientUser: () => {
         return client.user;
@@ -139,10 +136,7 @@ export const utilFunctions = {
         const fetchUser = await fetchResponse.json();
         const isFetchUserValid = !(fetchUser.code && fetchUser.code === 10013);
 
-        if (!isFetchUserValid) {
-            return false;
-        }
-
+        if (!isFetchUserValid) return false;
         return fetchUser.global_name;
     },
 };
@@ -152,5 +146,9 @@ export const openai = new OpenAIApi(
         apiKey: process.env.OPENAI_API_KEY,
     })
 );
+
+client.once(Events.ClientReady, (client) => {
+    console.log(`Ready! Logged in as ${client.user.tag}`);
+});
 
 client.login(process.env.DISCORD_BOT_TOKEN);
