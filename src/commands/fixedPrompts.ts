@@ -1,144 +1,347 @@
 import {
-	CommandInteraction,
-	CommandInteractionOptionResolver,
-	PermissionFlagsBits,
-	SlashCommandBuilder,
+    ChannelType,
+    CommandInteraction,
+    CommandInteractionOptionResolver,
+    PermissionFlagsBits,
+    SlashCommandBuilder,
 } from "discord.js";
-import { modifyJson, readJson } from "json-helper-toolkit";
 
-import { FixedPrompt, FixedPromptChannels } from "../types/jsonData";
-
-const commandDescriptions = {
-	name: "fixed-prompts",
-	description:
-		"Set a message that the bot can remember in this channel all the time.",
-	subcommands: [
-		{
-			name: "set",
-			description: "Set the fixed prompt.",
-			option: [
-				{
-					name: "message",
-					description: "The message to set.",
-				},
-			],
-		},
-		{
-			name: "remove",
-			description: "Remove the fixed prompt.",
-		},
-		{
-			name: "view",
-			description: "View the assigned message, if there is one.",
-		},
-	],
-	permissionLevel: PermissionFlagsBits.SendMessages,
-};
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName(commandDescriptions.name)
-		.setDescription(commandDescriptions.description)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(commandDescriptions.subcommands[0].name)
-				.setDescription(commandDescriptions.subcommands[0].description)
-				.addStringOption((option) =>
-					option
-						.setName(
-							commandDescriptions.subcommands[0]?.option?.[0].name ||
-								"Name not found."
-						)
-						.setDescription(
-							commandDescriptions.subcommands[0]?.option?.[0].description ||
-								"Description not found."
-						)
-						.setRequired(true)
-				)
-		)
-		.setDefaultMemberPermissions(commandDescriptions.permissionLevel)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(commandDescriptions.subcommands[1].name)
-				.setDescription(commandDescriptions.subcommands[1].description)
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(commandDescriptions.subcommands[2].name)
-				.setDescription(commandDescriptions.subcommands[2].description)
-		),
+    data: new SlashCommandBuilder()
+        .setName("fixed-prompts")
+        .setDescription(
+            "Set a message that the bot can remember in this channel all the time."
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("set")
+                .setDescription("Set the fixed prompt.")
+                .addStringOption((option) =>
+                    option
+                        .setName("message")
+                        .setDescription("The message to set.")
+                        .setRequired(true)
+                        .setMaxLength(1950)
+                )
+        )
+        .addSubcommandGroup((subcommandGroup) =>
+            subcommandGroup
+                .setName("custom")
+                .setDescription("Use your custom message.")
+                .addSubcommand((subcommand) =>
+                    subcommand
+                        .setName("set")
+                        .setDescription("Set a message.")
+                        .addStringOption((option) =>
+                            option
+                                .setName("message")
+                                .setDescription("The message you're to assign.")
+                                .setRequired(true)
+                                .setMaxLength(1950)
+                        )
+                )
+                .addSubcommand((subcommand) =>
+                    subcommand
+                        .setName("remove")
+                        .setDescription("Remove the fixed prompt.")
+                )
+                .addSubcommand((subcommand) =>
+                    subcommand
+                        .setName("view")
+                        .setDescription(
+                            "View the assigned message, if there is one."
+                        )
+                )
+        )
+        .addSubcommandGroup((subcommandGroup) =>
+            subcommandGroup
+                .setName("template")
+                .setDescription("Use some useful template messages.")
+                .addSubcommand((subcommand) =>
+                    subcommand
+                        .setName("view")
+                        .setDescription("View available templates.")
+                )
+                .addSubcommand((subcommand) =>
+                    subcommand
+                        .setName("select")
+                        .setDescription("Pick a template.")
+                        .addIntegerOption((option) =>
+                            option
+                                .setName("index")
+                                .setDescription(
+                                    "The index of the template you want to use."
+                                )
+                                .setRequired(true)
+                        )
+                )
+        ),
 
-	async execute(interaction: CommandInteraction) {
-		// Read subcommand name and required data.
-		const subCommand = (
-			interaction.options as CommandInteractionOptionResolver
-		).getSubcommand();
-		const [, data] = readJson<FixedPromptChannels>("data/fixedPrompt.json");
+    async execute(interaction: CommandInteraction) {
+        // Read subcommand name and required data.
+        const subCommandGroup = (
+            interaction.options as CommandInteractionOptionResolver
+        ).getSubcommandGroup();
+        const subCommand = (
+            interaction.options as CommandInteractionOptionResolver
+        ).getSubcommand();
 
-		switch (subCommand) {
-			case commandDescriptions.subcommands[0].name:
-				const message = interaction.options.get("message")?.value;
+        switch (subCommandGroup) {
+            case "custom":
+                switch (subCommand) {
+                    case "set":
+                        {
+                            await interaction.deferReply({ ephemeral: true });
+                            const message =
+                                interaction.options.get("message")?.value;
 
-				if (message) {
-					data[interaction.channelId + ""] = [];
-					data[interaction.channelId + ""].push({
-						userid: interaction.user.id,
-						prompt: message + "",
-					});
+                            let isSuccessful = false;
 
-					modifyJson("data/fixedPrompt.json", data);
-					return await interaction.reply(
-						`Successfully set the fixed prompt!\n\`${message}\``
-					);
-				} else {
-					return await interaction.reply(
-						"Please try again!\nThere is no message to set."
-					);
-				}
-				break;
+                            if (message && message !== "") {
+                                const existingFixedPrompts =
+                                    await prismaUtils.fixedPrompt.findFirst(
+                                        interaction.channelId,
+                                        interaction.user.id,
+                                        interaction.guildId ?? undefined
+                                    );
 
-			case commandDescriptions.subcommands[1].name:
-				data[interaction.channelId].forEach((one, index) => {
-					if (one && one.userid === interaction.user.id) {
-						delete data[interaction.channelId][index];
-					}
-				});
-				modifyJson("data/fixedPrompt.json", data);
+                                if (!existingFixedPrompts) {
+                                    const result =
+                                        await prismaUtils.fixedPrompt.create(
+                                            interaction.channelId,
+                                            interaction.user.id,
+                                            {
+                                                prompt: String(message),
+                                                isTemplate: false,
+                                            },
+                                            interaction.guildId ?? undefined
+                                        );
 
-				return await interaction.reply(
-					"Fixed prompt for this channel has been removed."
-				);
-				break;
+                                    if (result) {
+                                        isSuccessful = true;
+                                    }
+                                } else {
+                                    const result =
+                                        await prismaUtils.fixedPrompt.update(
+                                            interaction.channelId,
+                                            existingFixedPrompts.id,
+                                            {
+                                                prompt: String(message),
+                                                isTemplate: false,
+                                            },
+                                            interaction.guildId ?? undefined
+                                        );
 
-			case commandDescriptions.subcommands[2].name:
-				let userFixedPrompt: FixedPrompt | undefined = undefined;
-				if (
-					data[interaction.channelId + ""] &&
-					data[interaction.channelId + ""][0] !== null
-				) {
-					const channelDataArr = data[interaction.channelId + ""];
+                                    if (result) {
+                                        isSuccessful = true;
+                                    }
+                                }
 
-					for (let index = 0; index < channelDataArr.length; index++) {
-						if (
-							channelDataArr[index] &&
-							channelDataArr[index].userid === interaction.user.id
-						) {
-							userFixedPrompt = channelDataArr[index];
+                                if (!isSuccessful) {
+                                    return await interaction.editReply({
+                                        content: "Please try again later. 😢",
+                                    });
+                                }
+                                return await interaction.editReply(
+                                    `Successfully set the fixed prompt!\n\`${message}\``
+                                );
+                            }
+                        }
+                        break;
 
-							return await interaction.reply(
-								`Fixed prompt found :\n \`${userFixedPrompt.prompt}\``
-							);
-						}
-					}
-				}
+                    case "remove":
+                        {
+                            await interaction.deferReply({ ephemeral: true });
 
-				return await interaction.reply(
-					"There is no fixed prompt in this channel."
-				);
-				break;
+                            const existingFixedPrompts =
+                                await prismaUtils.fixedPrompt.findFirst(
+                                    interaction.channelId,
+                                    interaction.user.id,
+                                    interaction.guildId ?? undefined
+                                );
+                            if (!existingFixedPrompts) {
+                                return await interaction.editReply({
+                                    content: "Please try again later. 😢",
+                                });
+                            }
 
-			default:
-				break;
-		}
-	},
+                            await prismaUtils.fixedPrompt.delete(
+                                interaction.channelId,
+                                existingFixedPrompts.id,
+                                interaction.guildId ?? undefined
+                            );
+
+                            return await interaction.editReply(
+                                "Fixed prompt for this channel has been removed. ✅"
+                            );
+                        }
+                        break;
+
+                    case "view":
+                        {
+                            await interaction.deferReply({ ephemeral: true });
+
+                            const foundFixedPrompt =
+                                await prismaUtils.fixedPrompt.findFirst(
+                                    interaction.channelId,
+                                    interaction.user.id,
+                                    interaction.guildId ?? undefined
+                                );
+
+                            let isTemplate: boolean = false;
+
+                            foundFixedPrompt?.user.fixedPrompt.forEach(
+                                (prompt) => {
+                                    if (Boolean(prompt.isTemplate) === true) {
+                                        isTemplate = true;
+                                    }
+                                }
+                            );
+
+                            if (!foundFixedPrompt) {
+                                return await interaction.editReply({
+                                    content:
+                                        "You have no fixed prompt message. Try setting one!",
+                                });
+                            }
+
+                            if (!isTemplate) {
+                                return await interaction.editReply({
+                                    content: `Your fixed prompt setting message:\n \`${foundFixedPrompt.prompt}\``,
+                                });
+                            } else {
+                                return await interaction.editReply({
+                                    content:
+                                        "Template messages cannot be viewed. 😢",
+                                });
+                            }
+                        }
+                        break;
+                }
+                break;
+            case "template":
+                if (!interaction.guildId) {
+                    return await interaction.reply({
+                        content:
+                            "You cannot use this command in DM message! 🚫",
+                    });
+                }
+
+                const guildTemplates =
+                    await prismaUtils.fixedPromptTemplate.findSortedMany(
+                        interaction.channelId,
+                        interaction.guildId
+                    );
+
+                switch (subCommand) {
+                    case "view":
+                        {
+                            await interaction.deferReply({ ephemeral: true });
+
+                            let replyMessage = "";
+
+                            guildTemplates?.forEach((template, index) => {
+                                const naturalIndex = index + 1;
+                                if (index === 0) {
+                                    replyMessage += `${naturalIndex}. ${template.name}`;
+                                } else {
+                                    replyMessage += `\n${naturalIndex}. ${template.name}`;
+                                }
+                            });
+
+                            if (replyMessage === "") {
+                                return await interaction.editReply({
+                                    content:
+                                        "There is no template found in this server! 😢",
+                                });
+                            }
+
+                            return await interaction.editReply({
+                                content: replyMessage,
+                            });
+                        }
+                        break;
+                    case "select":
+                        {
+                            await interaction.deferReply({ ephemeral: true });
+
+                            const pickedIndex = interaction.options.get("index")
+                                ?.value as number;
+
+                            const existingFixedPrompt =
+                                await prismaUtils.fixedPrompt.findFirst(
+                                    interaction.channelId,
+                                    interaction.user.id,
+                                    interaction.guildId
+                                );
+
+                            const selectedTemplate =
+                                guildTemplates?.[pickedIndex - 1];
+
+                            if (
+                                selectedTemplate &&
+                                (pickedIndex > 0 ||
+                                    pickedIndex < guildTemplates.length)
+                            ) {
+                                let isSuccessful = false;
+
+                                if (!existingFixedPrompt) {
+                                    const createdFixedPrompt =
+                                        await prismaUtils.fixedPrompt.create(
+                                            interaction.channelId,
+                                            interaction.user.id,
+                                            {
+                                                prompt: selectedTemplate.message,
+                                                isTemplate: true,
+                                            },
+                                            interaction.guildId
+                                        );
+
+                                    if (createdFixedPrompt) {
+                                        isSuccessful = true;
+                                    }
+                                } else {
+                                    isSuccessful =
+                                        await prismaUtils.fixedPrompt.update(
+                                            interaction.channelId,
+                                            existingFixedPrompt.id,
+                                            {
+                                                prompt: selectedTemplate.message,
+                                                isTemplate: true,
+                                            },
+                                            interaction.guildId
+                                        );
+                                }
+
+                                if (!isSuccessful) {
+                                    return await interaction.editReply({
+                                        content: "Please try again later. 😢",
+                                    });
+                                }
+
+                                return await interaction.editReply({
+                                    content: `Now using a fixed prompt template: \n \`${selectedTemplate.name}\``,
+                                });
+                            } else if (
+                                guildTemplates &&
+                                (pickedIndex < 1 ||
+                                    pickedIndex >= guildTemplates.length)
+                            ) {
+                                return await interaction.editReply({
+                                    content:
+                                        "There is no template with the index. Please try again! 😢",
+                                });
+                            } else {
+                                return await interaction.editReply({
+                                    content: "Please try again later. 😢",
+                                });
+                            }
+                        }
+                        break;
+                }
+        }
+    },
 };

@@ -1,164 +1,147 @@
 import {
-	Client,
-	Collection,
-	Events,
-	GatewayIntentBits,
-	Partials,
-	TextChannel,
+    Client,
+    Collection,
+    Events,
+    GatewayIntentBits,
+    Partials,
+    TextChannel,
 } from "discord.js";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import { Configuration, OpenAIApi } from "openai";
 import * as path from "path";
 
-import { generateJsonData } from "./utils/utilFunctions";
-
 dotenv.config();
 
-// Client Instance
 const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.DirectMessages,
-	],
-	partials: [Partials.Channel],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages,
+    ],
+    partials: [Partials.Channel],
 });
 
-// Command Registration
-const commandProcess = () => {
-	const commandsPath = path.join(__dirname, "commands");
+const registerCommands = () => {
+    const commandsPath = path.join(__dirname, "commands");
+    client.commands = new Collection();
 
-	// Skip the function process when the directory doesn't exist.
-	try {
-		fs.readdirSync(commandsPath);
-	} catch (error) {
-		return;
-	}
+    const commandFiles = fs
+        .readdirSync(commandsPath)
+        .filter((file) => file.endsWith(".js"));
 
-	client.commands = new Collection();
+    commandFiles.forEach((file) => {
+        const filePath = path.join(commandsPath, file);
+        const commandFile = require(filePath);
 
-	const commandFiles = fs
-		.readdirSync(commandsPath)
-		.filter((file) => file.endsWith(".js"));
+        // Check whether the command file has a valid exported object.
+        if ("data" in commandFile && "execute" in commandFile) {
+            client.commands.set(commandFile.data.name, commandFile);
+        } else {
+            throw new Error(
+                `Command file at ${filePath} is missing a required property. ("data" and "execute")`
+            );
+        }
+    });
 
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
+    client.on(Events.InteractionCreate, async (interaction) => {
+        if (!interaction.isChatInputCommand()) return;
 
-		// The "if statement" below checks whether each command file
-		// has a valid exporting object.
-		if ("data" in command && "execute" in command) {
-			client.commands.set(command.data.name, command);
-		} else {
-			console.log(
-				`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-			);
-		}
-	}
+        const command = interaction.client.commands.get(
+            interaction.commandName
+        );
 
-	client.on(Events.InteractionCreate, async (interaction) => {
-		if (!interaction.isChatInputCommand()) return;
+        if (!command) {
+            throw new Error(
+                `No command with a matching name ${interaction.commandName} was found.`
+            );
+        }
 
-		const command = interaction.client.commands.get(interaction.commandName);
+        await command.execute(interaction);
+    });
+};
+registerCommands();
 
-		if (!command) {
-			console.error(
-				`No command matching ${interaction.commandName} was found.`
-			);
-			return;
-		}
+const registerProcess = function () {
+    const eventsPath = path.join(__dirname, "events");
 
-		try {
-			await command.execute(interaction);
-		} catch (error) {
-			console.log(error);
-			await interaction.reply({
-				content: "There was an error while executing this command!",
-				ephemeral: true,
-			});
-		}
-	});
+    fs.readdirSync(eventsPath);
+
+    const eventFiles = fs
+        .readdirSync(eventsPath)
+        .filter((file) => file.endsWith(".js"));
+
+    eventFiles.forEach((file) => {
+        const filePath = path.join(eventsPath, file);
+        const event = require(filePath);
+
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args));
+        }
+    });
+};
+registerProcess();
+
+export const utilFunctions = {
+    getGuildCache: (guildId: string) => {
+        return client.guilds.cache.get(guildId);
+    },
+    getChannelCache: (channelId: string) => {
+        return client.channels.cache.get(channelId);
+    },
+    getUserCache: (guildId: string, userId: string) => {
+        let guild = client.guilds.cache.get(guildId);
+
+        if (!guild) return;
+
+        let member = guild.members.cache.get(userId);
+        return member;
+    },
+    sendMessage: async (channelId: string, msg: string) => {
+        const channel = client.channels.cache.get(channelId);
+
+        if (!(channel instanceof TextChannel)) return;
+        if (!channel) return;
+
+        try {
+            await channel?.send(msg);
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    getClientChannel: (channelId: string) => {
+        const channel = client.channels.cache.get(channelId);
+
+        if (!channel) return;
+        return channel;
+    },
+    getClientUser: () => {
+        return client.user;
+    },
+    getUserGlobalName: async (userId: string) => {
+        const fetchResponse = await fetch(
+            `https://discord.com/api/v9/users/${userId}`,
+            {
+                headers: {
+                    Authorization: `Bot ${process.env.TOKEN}`,
+                },
+            }
+        );
+        const fetchUser = await fetchResponse.json();
+        const isFetchUserValid = !(fetchUser.code && fetchUser.code === 10013);
+
+        if (!isFetchUserValid) return false;
+        return fetchUser.global_name;
+    },
 };
 
-commandProcess();
-
-// Event Registration
-const eventProcess = function () {
-	const eventsPath = path.join(__dirname, "events");
-
-	// Skip the function process when the directory doesn't exist.
-	try {
-		fs.readdirSync(eventsPath);
-	} catch (error) {
-		console.log(error);
-		return;
-	}
-
-	const eventFiles = fs
-		.readdirSync(eventsPath)
-		.filter((file) => file.endsWith(".js"));
-
-	for (const file of eventFiles) {
-		const filePath = path.join(eventsPath, file);
-		const event = require(filePath);
-
-		if (event.once) {
-			client.once(event.name, (...args) => event.execute(...args));
-		} else {
-			client.on(event.name, (...args) => event.execute(...args));
-		}
-	}
-};
-
-eventProcess();
-
-export const usefulFuncs = {
-	getClient: () => {
-		return client;
-	},
-	getGuild: (guildId: string) => {
-		return client.guilds.cache.get(guildId);
-	},
-	getChannel: (channelId: string) => {
-		return client.channels.cache.get(channelId);
-	},
-	getUser: (guildId: string, userId: string) => {
-		let guild = client.guilds.cache.get(guildId);
-		let member = guild?.members.cache.get(userId);
-
-		return member;
-	},
-	sendMessage: async (channelId: string, msg: string) => {
-		if (channelId) {
-			const channel = client.channels.cache.get(channelId) as TextChannel;
-
-			if (channel && msg) {
-				try {
-					await channel?.send(msg);
-				} catch (err) {
-					var tm = new Date().toString();
-
-					console.log("---- catch error occured ----");
-					console.log("[" + tm + "]  " + err);
-				}
-			}
-		}
-	},
-	getClientUser: () => {
-		return client.user;
-	},
-};
-
-// openai Configuration
-const configuration = new Configuration({
-	apiKey: process.env.OPENAI_API_KEY,
-});
-export const openai = new OpenAIApi(configuration);
-
-client.on("ready", () => {
-	generateJsonData();
-});
+export const openai = new OpenAIApi(
+    new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+    })
+);
 
 client.login(process.env.DISCORD_BOT_TOKEN);

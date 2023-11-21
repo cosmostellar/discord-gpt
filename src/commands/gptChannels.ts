@@ -1,85 +1,115 @@
 import {
-  ChannelType,
-  CommandInteraction,
-  CommandInteractionOptionResolver,
-  PermissionFlagsBits,
-  SlashCommandBuilder,
+    ChannelType,
+    CommandInteraction,
+    CommandInteractionOptionResolver,
+    PermissionFlagsBits,
+    SlashCommandBuilder,
 } from "discord.js";
-import { modifyJson, readJson } from "json-helper-toolkit";
 
-import { GptChannel } from "../types/jsonData";
-
-const commandDescriptions = {
-	name: "gpt-channels",
-	description: "Manage GPT channels.",
-	subcommands: [
-		{
-			name: "add",
-			description: "Add this channel to the GPT channel list.",
-		},
-		{
-			name: "remove",
-			description: "Remove this channel from the GPT channel list.",
-		},
-	],
-	permissionLevel: PermissionFlagsBits.SendMessages,
-};
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName(commandDescriptions.name)
-		.setDescription(commandDescriptions.description)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(commandDescriptions.subcommands[0].name)
-				.setDescription(commandDescriptions.subcommands[0].description)
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName(commandDescriptions.subcommands[1].name)
-				.setDescription(commandDescriptions.subcommands[1].description)
-		)
-		.setDefaultMemberPermissions(commandDescriptions.permissionLevel),
+    data: new SlashCommandBuilder()
+        .setName("gpt-channels")
+        .setDescription("Manage GPT channels.")
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("add")
+                .setDescription("Add this channel to the GPT channel list.")
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("remove")
+                .setDescription(
+                    "Remove this channel from the GPT channel list."
+                )
+        )
+        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
-	async execute(interaction: CommandInteraction) {
-		// It shouldn't work in DM messages.
-		if (interaction.channel?.type === ChannelType.DM) {
-			return interaction.reply("This command cannot be used in DM messages.");
-		}
+    async execute(interaction: CommandInteraction) {
+        // It shouldn't work in DMs.
+        if (interaction.channel?.type === ChannelType.DM) {
+            return await interaction.reply({
+                content: "You cannot use this command in DM message! 🚫",
+            });
+        }
+        if (!interaction.guildId) return;
 
-		// Read subcommand name and required data.
-		const subCommand = (
-			interaction.options as CommandInteractionOptionResolver
-		).getSubcommand();
-		const [, data] = readJson<GptChannel>("data/gptChannel.json");
+        // Read subcommand name and required data.
+        const subCommand = (
+            interaction.options as CommandInteractionOptionResolver
+        ).getSubcommand();
+        let isAddingChannel: boolean;
 
-		switch (subCommand) {
-			case commandDescriptions.subcommands[0].name:
-				data.channelList.push(interaction.channelId);
+        if (subCommand === "add") {
+            isAddingChannel = true;
+        } else {
+            isAddingChannel = false;
+        }
 
-				modifyJson("data/gptChannel.json", data);
-				return await interaction.reply("This channel is now a GPT channel.");
-				break;
+        if (isAddingChannel !== null) {
+            await interaction.deferReply({ ephemeral: true });
 
-			case commandDescriptions.subcommands[1].name:
-				const targetIndex = data.channelList.indexOf(
-					interaction.channelId + ""
-				);
+            let isSuccessful = false;
 
-				data.channelList = [
-					...data.channelList.slice(0, targetIndex),
-					...data.channelList.slice(targetIndex + 1, data.channelList.length),
-				];
+            const existingChannel = await prismaUtils.channel.findFirst(
+                interaction.channelId,
+                interaction.guildId
+            );
 
-				modifyJson("data/gptChannel.json", data);
+            if (!existingChannel) {
+                const createdChannel = await prismaUtils.channel.create(
+                    interaction.channelId,
+                    interaction.guildId
+                );
 
-				return await interaction.reply(
-					"This channel is no longer a GPT channel."
-				);
-				break;
+                if (createdChannel && createdChannel.guildId) {
+                    const updatedChannel =
+                        await prismaUtils.channel.updateGptChannel(
+                            createdChannel.id,
+                            {
+                                isGptChannel: true,
+                            },
+                            createdChannel.guildId
+                        );
+                }
 
-			default:
-				break;
-		}
-	},
+                if (createdChannel) {
+                    isSuccessful = true;
+                }
+            }
+
+            const updatedChannel = await prismaUtils.channel.updateGptChannel(
+                interaction.channelId,
+                {
+                    isGptChannel: isAddingChannel,
+                },
+                interaction.guildId
+            );
+
+            if (!updatedChannel) {
+                return await interaction.editReply({
+                    content: "Please try again later. 😢",
+                });
+            }
+
+            isSuccessful = true;
+
+            if (!isSuccessful) {
+                return await interaction.editReply({
+                    content: "Please try again later. 😢",
+                });
+            }
+
+            if (!isAddingChannel) {
+                return await interaction.editReply({
+                    content: "This channel is no longer a GPT channel! 🤖",
+                });
+            }
+
+            return await interaction.editReply({
+                content: "This channel is now a GPT channel! 🤖",
+            });
+        }
+    },
 };
