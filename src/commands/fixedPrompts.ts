@@ -6,7 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import { fixedPrompt, fixedPromptTemplate } from "../utils/prismaUtils";
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -102,36 +102,38 @@ module.exports = {
 
                             if (message && message !== "") {
                                 const existingFixedPrompts =
-                                    await fixedPrompt.findFirst(
+                                    await prismaUtils.fixedPrompt.findFirst(
                                         interaction.channelId,
                                         interaction.user.id,
                                         interaction.guildId ?? undefined
                                     );
 
                                 if (!existingFixedPrompts) {
-                                    const result = await fixedPrompt.create(
-                                        interaction.channelId,
-                                        interaction.user.id,
-                                        {
-                                            prompt: String(message),
-                                            isTemplate: false,
-                                        },
-                                        interaction.guildId ?? undefined
-                                    );
+                                    const result =
+                                        await prismaUtils.fixedPrompt.create(
+                                            interaction.channelId,
+                                            interaction.user.id,
+                                            {
+                                                prompt: String(message),
+                                                isTemplate: false,
+                                            },
+                                            interaction.guildId ?? undefined
+                                        );
 
                                     if (result) {
                                         isSuccessful = true;
                                     }
                                 } else {
-                                    const result = await fixedPrompt.update(
-                                        interaction.channelId,
-                                        existingFixedPrompts.id,
-                                        {
-                                            prompt: String(message),
-                                            isTemplate: false,
-                                        },
-                                        interaction.guildId ?? undefined
-                                    );
+                                    const result =
+                                        await prismaUtils.fixedPrompt.update(
+                                            interaction.channelId,
+                                            existingFixedPrompts.id,
+                                            {
+                                                prompt: String(message),
+                                                isTemplate: false,
+                                            },
+                                            interaction.guildId ?? undefined
+                                        );
 
                                     if (result) {
                                         isSuccessful = true;
@@ -155,7 +157,7 @@ module.exports = {
                             await interaction.deferReply({ ephemeral: true });
 
                             const existingFixedPrompts =
-                                await fixedPrompt.findFirst(
+                                await prismaUtils.fixedPrompt.findFirst(
                                     interaction.channelId,
                                     interaction.user.id,
                                     interaction.guildId ?? undefined
@@ -166,7 +168,7 @@ module.exports = {
                                 });
                             }
 
-                            await fixedPrompt.delete(
+                            await prismaUtils.fixedPrompt.delete(
                                 interaction.channelId,
                                 existingFixedPrompts.id,
                                 interaction.guildId ?? undefined
@@ -183,7 +185,7 @@ module.exports = {
                             await interaction.deferReply({ ephemeral: true });
 
                             const foundFixedPrompt =
-                                await fixedPrompt.findFirst(
+                                await prismaUtils.fixedPrompt.findFirst(
                                     interaction.channelId,
                                     interaction.user.id,
                                     interaction.guildId ?? undefined
@@ -228,10 +230,11 @@ module.exports = {
                     });
                 }
 
-                const guildTemplates = await fixedPromptTemplate.findSortedMany(
-                    interaction.channelId,
-                    interaction.guildId
-                );
+                const guildTemplates =
+                    await prismaUtils.fixedPromptTemplate.findSortedMany(
+                        interaction.channelId,
+                        interaction.guildId
+                    );
 
                 switch (subCommand) {
                     case "view":
@@ -269,7 +272,7 @@ module.exports = {
                                 ?.value as number;
 
                             const existingFixedPrompt =
-                                await fixedPrompt.findFirst(
+                                await prismaUtils.fixedPrompt.findFirst(
                                     interaction.channelId,
                                     interaction.user.id,
                                     interaction.guildId
@@ -287,7 +290,7 @@ module.exports = {
 
                                 if (!existingFixedPrompt) {
                                     const createdFixedPrompt =
-                                        await fixedPrompt.create(
+                                        await prismaUtils.fixedPrompt.create(
                                             interaction.channelId,
                                             interaction.user.id,
                                             {
@@ -301,15 +304,16 @@ module.exports = {
                                         isSuccessful = true;
                                     }
                                 } else {
-                                    isSuccessful = await fixedPrompt.update(
-                                        interaction.channelId,
-                                        existingFixedPrompt.id,
-                                        {
-                                            prompt: selectedTemplate.message,
-                                            isTemplate: true,
-                                        },
-                                        interaction.guildId
-                                    );
+                                    isSuccessful =
+                                        await prismaUtils.fixedPrompt.update(
+                                            interaction.channelId,
+                                            existingFixedPrompt.id,
+                                            {
+                                                prompt: selectedTemplate.message,
+                                                isTemplate: true,
+                                            },
+                                            interaction.guildId
+                                        );
                                 }
 
                                 if (!isSuccessful) {

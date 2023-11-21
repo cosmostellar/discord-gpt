@@ -6,7 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import { prefix } from "../utils/prismaUtils";
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -63,7 +63,7 @@ module.exports = {
                     const targetPrefix =
                         interaction.options.get("prefix")?.value;
 
-                    const createdPrefix = await prefix.create(
+                    const createdPrefix = await prismaUtils.prefix.create(
                         {
                             prefixName: String(targetPrefix),
                         },
@@ -85,7 +85,7 @@ module.exports = {
             case "view":
                 {
                     await interaction.deferReply({ ephemeral: true });
-                    const prefixArr = await prefix.findMany(
+                    const prefixArr = await prismaUtils.prefix.findMany(
                         interaction.guildId
                     );
 

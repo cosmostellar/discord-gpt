@@ -6,7 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import { customAiProfile } from "../utils/prismaUtils";
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -58,20 +58,22 @@ module.exports = {
                 const avatarUrl = interaction.options.get("profile-url")
                     ?.value as string;
 
-                const foundCustomAiProfile = await customAiProfile.findFirst(
-                    interaction.user.id,
-                    interaction.guildId
-                );
-
-                if (!foundCustomAiProfile) {
-                    const createdCustomAiProfile = await customAiProfile.create(
+                const foundCustomAiProfile =
+                    await prismaUtils.customAiProfile.findFirst(
                         interaction.user.id,
-                        {
-                            name,
-                            avatar: avatarUrl,
-                        },
                         interaction.guildId
                     );
+
+                if (!foundCustomAiProfile) {
+                    const createdCustomAiProfile =
+                        await prismaUtils.customAiProfile.create(
+                            interaction.user.id,
+                            {
+                                name,
+                                avatar: avatarUrl,
+                            },
+                            interaction.guildId
+                        );
                     if (!createdCustomAiProfile) {
                         return await interaction.editReply({
                             content: "Please try again later. 😢",
@@ -83,15 +85,16 @@ module.exports = {
                     });
                 }
 
-                const updatedCustomAiProfile = await customAiProfile.update(
-                    interaction.channelId,
-                    foundCustomAiProfile.id,
-                    {
-                        name,
-                        avatar: avatarUrl,
-                    },
-                    interaction.guildId
-                );
+                const updatedCustomAiProfile =
+                    await prismaUtils.customAiProfile.update(
+                        interaction.channelId,
+                        foundCustomAiProfile.id,
+                        {
+                            name,
+                            avatar: avatarUrl,
+                        },
+                        interaction.guildId
+                    );
                 if (!updatedCustomAiProfile) {
                     return await interaction.editReply({
                         content: "Please try again later. 😢",
@@ -106,10 +109,11 @@ module.exports = {
             case "remove":
                 await interaction.deferReply({ ephemeral: true });
 
-                const deletedCustomAiProfile = await customAiProfile.deleteMany(
-                    interaction.user.id,
-                    interaction.guildId
-                );
+                const deletedCustomAiProfile =
+                    await prismaUtils.customAiProfile.deleteMany(
+                        interaction.user.id,
+                        interaction.guildId
+                    );
 
                 if (!deletedCustomAiProfile) {
                     return await interaction.editReply({

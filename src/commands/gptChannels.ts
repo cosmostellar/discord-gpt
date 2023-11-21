@@ -6,7 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import { channel } from "../utils/prismaUtils";
+import * as prismaUtils from "../utils/prismaUtils";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -52,25 +52,26 @@ module.exports = {
 
             let isSuccessful = false;
 
-            const existingChannel = await channel.findFirst(
+            const existingChannel = await prismaUtils.channel.findFirst(
                 interaction.channelId,
                 interaction.guildId
             );
 
             if (!existingChannel) {
-                const createdChannel = await channel.create(
+                const createdChannel = await prismaUtils.channel.create(
                     interaction.channelId,
                     interaction.guildId
                 );
 
                 if (createdChannel && createdChannel.guildId) {
-                    const updatedChannel = await channel.updateGptChannel(
-                        createdChannel.id,
-                        {
-                            isGptChannel: true,
-                        },
-                        createdChannel.guildId
-                    );
+                    const updatedChannel =
+                        await prismaUtils.channel.updateGptChannel(
+                            createdChannel.id,
+                            {
+                                isGptChannel: true,
+                            },
+                            createdChannel.guildId
+                        );
                 }
 
                 if (createdChannel) {
@@ -78,7 +79,7 @@ module.exports = {
                 }
             }
 
-            const updatedChannel = await channel.updateGptChannel(
+            const updatedChannel = await prismaUtils.channel.updateGptChannel(
                 interaction.channelId,
                 {
                     isGptChannel: isAddingChannel,
