@@ -58,11 +58,9 @@ Checks the ping.
 
 ## Required Bot Permissions
 ### General Permissions
-- Manage Channels
 - Manage Webhooks
 - Read Messages/View Channels
 
 ### Text Permissions
 - Send Messages
-- Manage Messages
 - Read Message History
