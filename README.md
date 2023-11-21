@@ -1,5 +1,5 @@
 # discord-gpt
-> This `json-version` version creates json files to save user data. It's separated from the [main](https://github.com/decaplanet/discord-gpt) branch, which is implemented with an ORM.
+> This version is not maintained anymore. Please use the [main version](https://github.com/decaplanet/discord-gpt).
 
 Discord bot that allows users to talk to gpt chatbots. The bot not only allows each user to personalize their own bot names and profile images using Discord webhooks, but also provides a range of useful features to enhance user experience.
 
