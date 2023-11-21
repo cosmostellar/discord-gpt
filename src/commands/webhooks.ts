@@ -12,37 +12,21 @@ import { utilFunctions } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { isValidHttpUrl } from "../utils/utilFunctions";
 
-const commandDescriptions = {
-    name: "webhooks",
-    description: "Manage webhook availability.",
-    subcommands: [
-        {
-            name: "add",
-            description: "Add a webhook in this channel.",
-        },
-        {
-            name: "remove",
-            description: "Remove the webhook from this channel.",
-        },
-    ],
-    permissionLevel: PermissionFlagsBits.SendMessages,
-};
-
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName(commandDescriptions.name)
-        .setDescription(commandDescriptions.description)
+        .setName("webhooks")
+        .setDescription("Manage webhook availability.")
         .addSubcommand((subcommand) =>
             subcommand
-                .setName(commandDescriptions.subcommands[0].name)
-                .setDescription(commandDescriptions.subcommands[0].description)
+                .setName("add")
+                .setDescription("Add a webhook in this channel.")
         )
         .addSubcommand((subcommand) =>
             subcommand
-                .setName(commandDescriptions.subcommands[1].name)
-                .setDescription(commandDescriptions.subcommands[1].description)
+                .setName("remove")
+                .setDescription("Remove the webhook from this channel.")
         )
-        .setDefaultMemberPermissions(commandDescriptions.permissionLevel),
+        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
     async execute(interaction: CommandInteraction) {
         // It shouldn't work in DMs.
@@ -62,7 +46,7 @@ module.exports = {
         const channel = utilFunctions.getChannelCache(interaction.channelId);
 
         switch (subCommand) {
-            case commandDescriptions.subcommands[0].name:
+            case "add":
                 let isExisting = false;
 
                 if (channel instanceof TextChannel) {
@@ -101,7 +85,7 @@ module.exports = {
                 return await interaction.reply("Webhook successfully added.");
                 break;
 
-            case commandDescriptions.subcommands[1].name:
+            case "remove":
                 if (channel instanceof TextChannel) {
                     const existingWebhooks =
                         (await channel.fetchWebhooks()) || undefined;
