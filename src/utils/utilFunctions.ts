@@ -3,7 +3,7 @@ import { readJson } from "json-helper-toolkit";
 
 import { utilFunctions } from "../";
 import { ConfigData } from "../types/jsonData";
-import { customAiProfile } from "./prismaUtils";
+import * as prismaUtils from "./prismaUtils";
 
 export const delay = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,7 +34,7 @@ export const sendWebhookMessage = async ({
     channelId,
     content,
 }: SendWebhookMessageArgs) => {
-    const customAiProfileData = await customAiProfile.findFirst(
+    const customAiProfileData = await prismaUtils.customAiProfile.findFirst(
         userId,
         guildId
     );

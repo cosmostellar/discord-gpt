@@ -2,7 +2,7 @@ import { Channel, Events } from "discord.js";
 
 import { channel as prismaChannel } from "../utils/prismaUtils";
 
-export default {
+module.exports = {
     name: Events.ChannelDelete,
     once: true,
     async execute(channel: Channel) {

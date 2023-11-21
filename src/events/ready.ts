@@ -1,6 +1,6 @@
 import { Client, Events } from "discord.js";
 
-export default {
+module.exports = {
     name: Events.ClientReady,
     once: true,
 
