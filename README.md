@@ -1,6 +1,4 @@
 # discord-gpt
-> If you prefer to use the bot without a database, you can alternatively use [json-version](https://github.com/decaplanet/discord-gpt/tree/json-version).
-
 Discord bot that allows users to talk to gpt chatbots. The bot not only allows each user to personalize their own bot names and profile images using Discord webhooks, but also provides a range of useful features to enhance user experience.
 
 
