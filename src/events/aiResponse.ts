@@ -16,6 +16,8 @@ import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 
 module.exports = {
     name: Events.MessageCreate,
+    once: false,
+
     async execute(message: Message) {
         // Get channel data from the database.
         const isDM = message.channel?.type === ChannelType.DM;

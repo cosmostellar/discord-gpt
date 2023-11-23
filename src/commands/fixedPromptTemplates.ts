@@ -44,6 +44,7 @@ module.exports = {
                         .setRequired(true)
                 )
         ),
+
     async execute(interaction: CommandInteraction) {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {

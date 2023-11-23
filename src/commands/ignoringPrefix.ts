@@ -42,6 +42,7 @@ module.exports = {
                 .setName("view")
                 .setDescription("View the list of ignoring prefixes.")
         ),
+
     async execute(interaction: CommandInteraction) {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {
