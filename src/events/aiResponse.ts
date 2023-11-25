@@ -48,11 +48,11 @@ module.exports = {
             if (!prefixData && message.content.startsWith("!")) {
                 return;
             } else if (prefixData) {
-                for (let index = 0; index < prefixData.length; index++) {
-                    if (message.content.startsWith(prefixData[index].name)) {
+                prefixData.forEach((prefix) => {
+                    if (message.content.startsWith(prefix.name)) {
                         return;
                     }
-                }
+                });
             }
         }
 
@@ -179,9 +179,9 @@ module.exports = {
             const answerList = getAnswerList(reply);
 
             try {
-                for (let index = 0; index < answerList.length; index++) {
-                    replyMessage(message, answerList[index]);
-                }
+                answerList.forEach((answer) => {
+                    replyMessage(message, answer);
+                });
             } catch (error) {
                 isTyping = false;
                 console.log(`ERR: ${error}`);
