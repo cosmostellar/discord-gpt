@@ -92,11 +92,11 @@ module.exports = {
 
                     let list = "";
                     if (prefixArr) {
-                        prefixArr.map((one, index) => {
+                        prefixArr.forEach((item, index) => {
                             if (index === prefixArr.length - 1) {
-                                list += `${one.name}`;
+                                list += `${item.name}`;
                             } else {
-                                list += `${one.name} / `;
+                                list += `${item.name} / `;
                             }
                         });
 

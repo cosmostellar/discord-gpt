@@ -54,7 +54,7 @@ export const sendWebhookMessage = async ({
         let messageSent = false;
 
         try {
-            webhooks?.map((webhook) => {
+            webhooks?.forEach((webhook) => {
                 if (
                     webhook.name === configData.webhookName &&
                     webhook.owner?.id === utilFunctions.getClientUser()?.id
@@ -109,7 +109,7 @@ export const sendSimpleWebhook = async ({
 
         let messageSent = false;
         try {
-            webhooks.map(async (webhook) => {
+            webhooks.forEach(async (webhook) => {
                 if (webhook.name === configData.webhookName) {
                     webhook.send({
                         content,
