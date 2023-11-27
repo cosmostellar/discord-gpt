@@ -46,14 +46,14 @@ Checks the ping.
 
 
 ## `package.json` Scripts
-| name                | description                                                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `start`             | Starts the code in the `build` directory.                                                                                       |
-| `build`             | Builds the code in the `src` directory.                                                                                         |
-| `dev:ts`            | Watches the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
-| `dev:watch`         | Watches changes in the `build` folder and reruns the process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
-| `cmd:deploy`        | Deploys slash commands for the specified server in the `.env` file.                                                             |
-| `cmd:deploy-global` | Deploys global slash commands.                                                                                                  |
+| name                    | description                                                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ts:watch`              | Watch the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
+| `start`                 | Start the code in the `build` directory.                                                                                      |
+| `watch`                 | Watch changes in the `build` folder and reruns the process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
+| `build`                 | Build the code in the `src` directory.                                                                                        |
+| `discord:deploy`        | Deploy slash commands for the specified server in the `.env` file.                                                            |
+| `discord:deploy-global` | Deploy global slash commands.                                                                                                 |
 
 
 ## Required Bot Permissions
