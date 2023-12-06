@@ -1,5 +1,5 @@
 {
-  "aiInputLimit": 15,
-  "webhookName": "disco-gpt",
-  "webhookImgUrl": ""
+    "aiInputLimit": 15,
+    "webhookName": "disco-gpt",
+    "webhookImgUrl": ""
 }

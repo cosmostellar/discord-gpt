@@ -1,5 +1,5 @@
 export interface ConfigData {
-	aiInputLimit: number;
-	webhookName: string;
-	webhookImgUrl: string;
+    aiInputLimit: number;
+    webhookName: string;
+    webhookImgUrl: string;
 }
