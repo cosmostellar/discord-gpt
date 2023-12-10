@@ -1,11 +1,10 @@
 # discord-gpt
-Discord bot that allows users to talk to gpt chatbots. The bot not only allows each user to personalize their own bot names and profile images using Discord webhooks, but also provides a range of useful features to enhance user experience.
-
+Discord bot you can use to talk to GPT chatbots. It comes with useful features that help you customize your experience.
 
 ## Commands
 ### gpt-channels
-You can set channels where the bot always answers you.
-Otherwise, you need to mention/ping the bot.
+Decide channels where the bot always answers you.
+(Otherwise, you need to ping the bot.)
 
 | command              | argument |
 | -------------------- | -------- |
@@ -13,7 +12,7 @@ Otherwise, you need to mention/ping the bot.
 | /gpt-channels remove | (None)   |
 
 ### custom-ai-profile
-You can set your preferred name and image for answers you receive.
+Set your custom name and image for your AI.
 
 | command                   | argument          | 
 | ------------------------- | ----------------- |
@@ -21,7 +20,7 @@ You can set your preferred name and image for answers you receive.
 | /custom-ai-profile remove | (None)            |
 
 ### webhooks
-Since the custom profile feature works with webhooks, you need to add a webhook in your channels.
+Custom profile only works in channels with webhooks.
 
 | command          | argument |
 | ---------------- | -------- |
@@ -29,7 +28,7 @@ Since the custom profile feature works with webhooks, you need to add a webhook 
 | /webhooks remove | (None)   |
 
 ### ignoring-prefix
-You can set which prefix the bot need to ignore in gpt channels. ex) `!Hey people` when `!` is added.
+Set prefix the bot needs to ignore. (For other bots and messages ignored by AI.)
 
 | command                 | argument |
 | ----------------------- | -------- |
@@ -38,7 +37,7 @@ You can set which prefix the bot need to ignore in gpt channels. ex) `!Hey peopl
 | /ignoring-prefix view   | (None)   |
 
 ### ping
-Checks the ping.
+Check the ping.
 
 | command | argument |
 | ------- | -------- |
