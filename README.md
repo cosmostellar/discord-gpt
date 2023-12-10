@@ -28,7 +28,7 @@ Custom profile only works in channels with webhooks.
 | /webhooks remove | (None)   |
 
 ### ignoring-prefix
-Set prefix the bot needs to ignore. (For other bots and messages ignored by AI.)
+Set prefix the bot needs to ignore. (For other bots and messages you don't want AI to read.)
 
 | command                 | argument |
 | ----------------------- | -------- |
