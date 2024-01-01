@@ -11,7 +11,7 @@ const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("fixed-prompts")
         .setDescription(
-            "Set a message that the bot can remember in this channel all the time."
+            "Set a message the bot can remember all the time in this channel."
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages)
         .addSubcommand((subcommand) =>
@@ -29,7 +29,7 @@ const command: CommandFile = {
         .addSubcommandGroup((subcommandGroup) =>
             subcommandGroup
                 .setName("custom")
-                .setDescription("Use your custom message.")
+                .setDescription("Set your custom message.")
                 .addSubcommand((subcommand) =>
                     subcommand
                         .setName("set")
@@ -37,7 +37,7 @@ const command: CommandFile = {
                         .addStringOption((option) =>
                             option
                                 .setName("message")
-                                .setDescription("The message you're to assign.")
+                                .setDescription("The message to set.")
                                 .setRequired(true)
                                 .setMaxLength(1950)
                         )
@@ -45,20 +45,18 @@ const command: CommandFile = {
                 .addSubcommand((subcommand) =>
                     subcommand
                         .setName("remove")
-                        .setDescription("Remove the fixed prompt.")
+                        .setDescription("Remove the existing fixed prompt.")
                 )
                 .addSubcommand((subcommand) =>
                     subcommand
                         .setName("view")
-                        .setDescription(
-                            "View the assigned message, if there is one."
-                        )
+                        .setDescription("View your fixed-prompt.")
                 )
         )
         .addSubcommandGroup((subcommandGroup) =>
             subcommandGroup
                 .setName("template")
-                .setDescription("Use some useful template messages.")
+                .setDescription("Use template messages.")
                 .addSubcommand((subcommand) =>
                     subcommand
                         .setName("view")
@@ -67,13 +65,11 @@ const command: CommandFile = {
                 .addSubcommand((subcommand) =>
                     subcommand
                         .setName("select")
-                        .setDescription("Pick a template.")
+                        .setDescription("Select a template with its ID.")
                         .addIntegerOption((option) =>
                             option
                                 .setName("index")
-                                .setDescription(
-                                    "The index of the template you want to use."
-                                )
+                                .setDescription("The ID of the template.")
                                 .setRequired(true)
                         )
                 )

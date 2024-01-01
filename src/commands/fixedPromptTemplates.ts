@@ -11,7 +11,7 @@ import * as prismaUtils from "../utils/prismaUtils";
 const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("fixed-prompt-templates")
-        .setDescription("Set a templated fixed prompt for your server!")
+        .setDescription("Set a template fixed prompt in your server.")
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
         .addSubcommand((subcommand) =>
             subcommand
@@ -20,13 +20,17 @@ const command: CommandFile = {
                 .addStringOption((option) =>
                     option
                         .setName("name")
-                        .setDescription("Displayed in the list.")
+                        .setDescription(
+                            "A name displayed in the template list."
+                        )
                         .setRequired(true)
                 )
                 .addStringOption((option) =>
                     option
                         .setName("message")
-                        .setDescription("Not displayed in the list.")
+                        .setDescription(
+                            "The message to set. It's not displayed in the template list."
+                        )
                         .setRequired(true)
                         .setMaxLength(1950)
                 )
@@ -38,9 +42,7 @@ const command: CommandFile = {
                 .addIntegerOption((option) =>
                     option
                         .setName("index")
-                        .setDescription(
-                            "The index of the template you want to use."
-                        )
+                        .setDescription("The ID of the template.")
                         .setRequired(true)
                 )
         ),

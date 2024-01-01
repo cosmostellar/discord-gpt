@@ -5,7 +5,7 @@ import { CommandFile } from "../types/registerTypes";
 const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("ping")
-        .setDescription("Check the ping speed."),
+        .setDescription("Check the chatbot ping."),
 
     execute: async (interaction) => {
         const client = interaction.client;

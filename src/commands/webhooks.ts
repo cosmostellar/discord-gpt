@@ -15,7 +15,7 @@ import { isValidHttpUrl } from "../utils/utilFunctions";
 const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("webhooks")
-        .setDescription("Manage webhook availability.")
+        .setDescription("Manage a webhook for this channel.")
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("add")
@@ -24,7 +24,7 @@ const command: CommandFile = {
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("remove")
-                .setDescription("Remove the webhook from this channel.")
+                .setDescription("Remove a webhook from this channel.")
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 

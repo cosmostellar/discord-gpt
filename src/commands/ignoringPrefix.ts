@@ -11,12 +11,12 @@ import * as prismaUtils from "../utils/prismaUtils";
 const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("ignoring-prefix")
-        .setDescription("Manage what prefix the chatbot will ignore.")
+        .setDescription("Manage prefixes ignored by the chatbot.")
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("add")
-                .setDescription("Add this channel in the GPT channel list.")
+                .setDescription("Add a prefix the bot needs to ignore.")
                 .addStringOption((option) =>
                     option
                         .setName("prefix")
@@ -27,9 +27,7 @@ const command: CommandFile = {
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("remove")
-                .setDescription(
-                    "Remove this channel from the GPT channel list."
-                )
+                .setDescription("Stop ignoring a prefix.")
                 .addStringOption((option) =>
                     option
                         .setName("prefix")
@@ -40,7 +38,7 @@ const command: CommandFile = {
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("view")
-                .setDescription("View the list of ignoring prefixes.")
+                .setDescription("View the ignoring-prefix list.")
         ),
 
     execute: async (interaction) => {

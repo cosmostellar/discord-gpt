@@ -19,20 +19,20 @@ const command: CommandFile = {
                 .addStringOption((option) =>
                     option
                         .setName("name")
-                        .setDescription("Name for the chatbot.")
+                        .setDescription("Display name for the chatbot.")
                         .setRequired(true)
                 )
                 .addStringOption((option) =>
                     option
                         .setName("profile-url")
-                        .setDescription("URL of the profile picture.")
+                        .setDescription("URL of a profile picture.")
                         .setRequired(true)
                 )
         )
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("remove")
-                .setDescription("Remove the custom profile setting.")
+                .setDescription("Remove existing custom profile setting.")
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
