@@ -113,12 +113,6 @@ export const utilFuncs = {
             console.log(err);
         }
     },
-    getClientChannel: (channelId: string) => {
-        const channel = client.channels.cache.get(channelId);
-
-        if (!channel) return;
-        return channel;
-    },
     getClientUser: () => {
         return client.user;
     },
