@@ -1,11 +1,13 @@
-import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
-module.exports = {
+import { CommandFile } from "../types/registerTypes";
+
+const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Check the ping speed."),
 
-    async execute(interaction: CommandInteraction) {
+    execute: async (interaction) => {
         const client = interaction.client;
         const ping = client.ws.ping;
 
@@ -16,3 +18,5 @@ module.exports = {
         return await interaction.reply(`ping : ${ping} ms`);
     },
 };
+
+export default command;

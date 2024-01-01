@@ -1,14 +1,14 @@
 import {
     ChannelType,
-    CommandInteraction,
     CommandInteractionOptionResolver,
     PermissionFlagsBits,
     SlashCommandBuilder,
 } from "discord.js";
 
+import { CommandFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 
-module.exports = {
+const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("fixed-prompt-templates")
         .setDescription("Set a templated fixed prompt for your server!")
@@ -45,7 +45,7 @@ module.exports = {
                 )
         ),
 
-    async execute(interaction: CommandInteraction) {
+    execute: async (interaction) => {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {
             return await interaction.reply({
@@ -139,3 +139,5 @@ module.exports = {
         }
     },
 };
+
+export default command;

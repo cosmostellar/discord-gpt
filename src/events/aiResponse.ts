@@ -9,15 +9,15 @@ import {
 import { readJson } from "json-helper-toolkit";
 import { ChatCompletionRequestMessage } from "openai";
 
-import { openai, utilFunctions } from "../index";
+import { openai, utilFuncs } from "../index";
 import { ConfigData } from "../types/jsonData";
+import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 
-module.exports = {
+const event: EventFile = {
     name: Events.MessageCreate,
     once: false,
-
     async execute(message: Message) {
         // Get channel data from the database.
         const isDM = message.channel?.type === ChannelType.DM;
@@ -104,16 +104,16 @@ module.exports = {
 
         // Replace placeholders.
         const userNickname = message.guildId
-            ? utilFunctions.getUserCache(message.guildId, message.author.id)
+            ? utilFuncs.getUserCache(message.guildId, message.author.id)
                   ?.nickname
             : "{not-found}";
         const foundNickname =
             (userNickname
                 ? userNickname
-                : await utilFunctions.getUserGlobalName(message.author.id)) ||
+                : await utilFuncs.getUserGlobalName(message.author.id)) ||
             "{not-found}";
         const guildName = message.guildId
-            ? utilFunctions.getGuildCache(message.guildId)?.name
+            ? utilFuncs.getGuildCache(message.guildId)?.name
             : "{not-found}";
         const channelName = !isDM ? message.channel.name : "{not-found}";
 
@@ -199,7 +199,7 @@ module.exports = {
     },
 };
 
-const executeAsync = (func: Function, channel: TextChannel) => {
+const executeAsync = (func: (...args: any[]) => any, channel: TextChannel) => {
     setTimeout(func, 0, channel);
 };
 
@@ -267,14 +267,14 @@ const checkAvailability = async (message: Message, isDM: boolean) => {
         isAvailableChannel = false;
     }
     message.mentions.users.forEach((one) => {
-        if (one.id === utilFunctions.getClientUser()?.id) {
+        if (one.id === utilFuncs.getClientUser()?.id) {
             isAvailableChannel = true;
         }
     });
     // Answer the message if the bot was mentioned.
     // It still replies even when the channel is not a GPT channel.
     message.mentions.users.forEach((one) => {
-        if (one.id === utilFunctions.getClientUser()?.id) {
+        if (one.id === utilFuncs.getClientUser()?.id) {
             isAvailableChannel = true;
         }
     });
@@ -298,7 +298,7 @@ const getChatLog = async (
         const readingMessage: Message = prevMessages[i][1];
 
         if (
-            readingMessage.author.id === utilFunctions.getClientUser()?.id &&
+            readingMessage.author.id === utilFuncs.getClientUser()?.id &&
             !readingMessage.webhookId
         ) {
             // If the message was created by the chatbot.
@@ -413,3 +413,5 @@ const getAnswerList = (reply: Reply) => {
 
     return answerList;
 };
+
+export default event;

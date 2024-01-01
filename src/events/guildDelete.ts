@@ -1,12 +1,14 @@
 import { Events, Guild } from "discord.js";
 
+import { EventFile } from "../types/registerTypes";
 import { guild as prismaGuild } from "../utils/prismaUtils";
 
-module.exports = {
+const event: EventFile = {
     name: Events.GuildDelete,
     once: true,
-
-    async execute(guild: Guild) {
+    execute: async (guild: Guild) => {
         await prismaGuild.delete(guild.id);
     },
 };
+
+export default event;

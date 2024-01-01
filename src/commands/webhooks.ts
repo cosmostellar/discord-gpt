@@ -1,6 +1,5 @@
 import {
     ChannelType,
-    CommandInteraction,
     CommandInteractionOptionResolver,
     PermissionFlagsBits,
     SlashCommandBuilder,
@@ -8,11 +7,12 @@ import {
 } from "discord.js";
 import { readJson } from "json-helper-toolkit";
 
-import { utilFunctions } from "../index";
+import { utilFuncs } from "../index";
 import { ConfigData } from "../types/jsonData";
+import { CommandFile } from "../types/registerTypes";
 import { isValidHttpUrl } from "../utils/utilFunctions";
 
-module.exports = {
+const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("webhooks")
         .setDescription("Manage webhook availability.")
@@ -28,7 +28,7 @@ module.exports = {
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
-    async execute(interaction: CommandInteraction) {
+    execute: async (interaction) => {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {
             return await interaction.reply({
@@ -43,7 +43,7 @@ module.exports = {
         ).getSubcommand();
         const [, configData] = readJson<ConfigData>("config.json");
 
-        const channel = utilFunctions.getChannelCache(interaction.channelId);
+        const channel = utilFuncs.getChannelCache(interaction.channelId);
 
         switch (subCommand) {
             case "add":
@@ -57,7 +57,7 @@ module.exports = {
                         if (oneWebhook.name === configData.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
-                                utilFunctions.getClientUser()?.id
+                                utilFuncs.getClientUser()?.id
                             ) {
                                 isExisting = true;
                             } else {
@@ -95,7 +95,7 @@ module.exports = {
                         if (oneWebhook.name === configData.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
-                                utilFunctions.getClientUser()?.id
+                                utilFuncs.getClientUser()?.id
                             ) {
                                 oneWebhook.delete().catch((e) => {
                                     console.log(e);
@@ -123,3 +123,5 @@ module.exports = {
         }
     },
 };
+
+export default command;

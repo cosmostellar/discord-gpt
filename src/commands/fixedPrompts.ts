@@ -1,14 +1,13 @@
 import {
-    ChannelType,
-    CommandInteraction,
     CommandInteractionOptionResolver,
     PermissionFlagsBits,
     SlashCommandBuilder,
 } from "discord.js";
 
+import { CommandFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 
-module.exports = {
+const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("fixed-prompts")
         .setDescription(
@@ -80,7 +79,7 @@ module.exports = {
                 )
         ),
 
-    async execute(interaction: CommandInteraction) {
+    execute: async (interaction) => {
         // Read subcommand name and required data.
         const subCommandGroup = (
             interaction.options as CommandInteractionOptionResolver
@@ -345,3 +344,5 @@ module.exports = {
         }
     },
 };
+
+export default command;

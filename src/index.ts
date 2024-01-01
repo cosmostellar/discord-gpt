@@ -11,6 +11,8 @@ import * as fs from "fs";
 import { Configuration, OpenAIApi } from "openai";
 import * as path from "path";
 
+import { CommandFile, EventFile } from "./types/registerTypes";
+
 dotenv.config();
 
 const client = new Client({
@@ -31,9 +33,9 @@ const registerCommands = () => {
         .readdirSync(commandsPath)
         .filter((file) => file.endsWith(".js"));
 
-    commandFiles.forEach((file) => {
+    commandFiles.forEach(async (file) => {
         const filePath = path.join(commandsPath, file);
-        const commandFile = require(filePath);
+        const commandFile: CommandFile = (await import(filePath)).default;
 
         // Check whether the command file has a valid exported object.
         if ("data" in commandFile && "execute" in commandFile) {
@@ -63,18 +65,17 @@ const registerCommands = () => {
 };
 registerCommands();
 
-const registerProcess = function () {
+const registerEvents = () => {
     const eventsPath = path.join(__dirname, "events");
-
     fs.readdirSync(eventsPath);
 
     const eventFiles = fs
         .readdirSync(eventsPath)
         .filter((file) => file.endsWith(".js"));
 
-    eventFiles.forEach((file) => {
+    eventFiles.forEach(async (file) => {
         const filePath = path.join(eventsPath, file);
-        const event = require(filePath);
+        const event: EventFile = (await import(filePath)).default;
 
         if (event.once) {
             client.once(event.name, (...args) => event.execute(...args));
@@ -83,9 +84,9 @@ const registerProcess = function () {
         }
     });
 };
-registerProcess();
+registerEvents();
 
-export const utilFunctions = {
+export const utilFuncs = {
     getGuildCache: (guildId: string) => {
         return client.guilds.cache.get(guildId);
     },

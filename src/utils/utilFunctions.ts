@@ -1,7 +1,7 @@
 import { TextChannel } from "discord.js";
 import { readJson } from "json-helper-toolkit";
 
-import { utilFunctions } from "../";
+import { utilFuncs } from "../";
 import { ConfigData } from "../types/jsonData";
 import * as prismaUtils from "./prismaUtils";
 
@@ -39,11 +39,11 @@ export const sendWebhookMessage = async ({
         guildId
     );
 
-    const channel = utilFunctions.getChannelCache(channelId);
+    const channel = utilFuncs.getChannelCache(channelId);
 
     if (customAiProfileData && channel instanceof TextChannel) {
         if (!isValidHttpUrl(customAiProfileData.avatar)) {
-            utilFunctions.sendMessage(channel.id, "Image URL is not valid.");
+            utilFuncs.sendMessage(channel.id, "Image URL is not valid.");
             return;
         }
 
@@ -57,7 +57,7 @@ export const sendWebhookMessage = async ({
             webhooks?.forEach((webhook) => {
                 if (
                     webhook.name === configData.webhookName &&
-                    webhook.owner?.id === utilFunctions.getClientUser()?.id
+                    webhook.owner?.id === utilFuncs.getClientUser()?.id
                 ) {
                     webhook.send({
                         content,
@@ -70,11 +70,11 @@ export const sendWebhookMessage = async ({
             });
         } catch (error) {
             console.log(error);
-            utilFunctions.sendMessage(channel.id, "Please try again later.");
+            utilFuncs.sendMessage(channel.id, "Please try again later.");
         }
 
         if (!messageSent) {
-            utilFunctions.sendMessage(
+            utilFuncs.sendMessage(
                 channel.id,
                 "Webhook is not found. Please add one in this channel."
             );
@@ -95,11 +95,11 @@ export const sendSimpleWebhook = async ({
     webhookName,
     webhookImg,
 }: sendWebhookArgs) => {
-    const channel = utilFunctions.getChannelCache(channelId);
+    const channel = utilFuncs.getChannelCache(channelId);
 
     if (channel instanceof TextChannel) {
         if (!isValidHttpUrl(webhookImg)) {
-            utilFunctions.sendMessage(channel.id, "Image URL is not valid.");
+            utilFuncs.sendMessage(channel.id, "Image URL is not valid.");
             return;
         }
 
@@ -122,11 +122,11 @@ export const sendSimpleWebhook = async ({
             });
         } catch (error) {
             console.log(error);
-            utilFunctions.sendMessage(channel.id, "Please try again later.");
+            utilFuncs.sendMessage(channel.id, "Please try again later.");
         }
 
         if (!messageSent) {
-            utilFunctions.sendMessage(
+            utilFuncs.sendMessage(
                 channel.id,
                 "Webhook is not found. Please add one in this channel."
             );

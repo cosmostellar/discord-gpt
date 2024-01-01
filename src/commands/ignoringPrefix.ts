@@ -1,14 +1,14 @@
 import {
     ChannelType,
-    CommandInteraction,
     CommandInteractionOptionResolver,
     PermissionFlagsBits,
     SlashCommandBuilder,
 } from "discord.js";
 
+import { CommandFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 
-module.exports = {
+const command: CommandFile = {
     data: new SlashCommandBuilder()
         .setName("ignoring-prefix")
         .setDescription("Manage what prefix the chatbot will ignore.")
@@ -43,7 +43,7 @@ module.exports = {
                 .setDescription("View the list of ignoring prefixes.")
         ),
 
-    async execute(interaction: CommandInteraction) {
+    execute: async (interaction) => {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {
             return await interaction.reply({
@@ -118,3 +118,5 @@ module.exports = {
         }
     },
 };
+
+export default command;

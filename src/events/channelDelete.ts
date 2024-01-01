@@ -1,12 +1,14 @@
 import { Channel, Events } from "discord.js";
 
+import { EventFile } from "../types/registerTypes";
 import { channel as prismaChannel } from "../utils/prismaUtils";
 
-module.exports = {
+const event: EventFile = {
     name: Events.ChannelDelete,
     once: true,
-
-    async execute(channel: Channel) {
+    execute: async (channel: Channel) => {
         await prismaChannel.delete(channel.id);
     },
 };
+
+export default event;
