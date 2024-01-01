@@ -128,7 +128,7 @@ export const sendSimpleWebhook = async ({
         if (!messageSent) {
             utilFuncs.sendMessage(
                 channel.id,
-                "Webhook is not found. Please add one in this channel."
+                "Webhook is not found. Please add one to this channel."
             );
         }
     }
