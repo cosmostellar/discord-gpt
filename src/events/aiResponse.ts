@@ -400,16 +400,12 @@ interface Reply {
 }
 
 const getAnswerList = (reply: Reply) => {
-    const answerList = [
-        reply.content.slice(0, 2000),
-        reply.content.slice(2000, reply.content.length - 1),
-    ];
+    const answerList: string[] = [];
+    let lastIndex = 0;
 
-    while (answerList[answerList.length - 1].length > 1999) {
-        answerList.push(answerList[answerList.length - 1].slice(0, 2000));
-        answerList[answerList.length - 1] = answerList[
-            answerList.length - 1
-        ].slice(2000, answerList[answerList.length - 1].length - 1);
+    while (lastIndex < reply.content.length) {
+        answerList.push(reply.content.slice(lastIndex, lastIndex + 1999));
+        lastIndex += 1999;
     }
 
     return answerList;
