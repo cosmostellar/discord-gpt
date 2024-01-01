@@ -135,21 +135,6 @@ export const utilFuncs = {
     getClientUser: () => {
         return client.user;
     },
-    getUserGlobalName: async (userId: string) => {
-        const fetchResponse = await fetch(
-            `https://discord.com/api/v9/users/${userId}`,
-            {
-                headers: {
-                    Authorization: `Bot ${process.env.TOKEN}`,
-                },
-            }
-        );
-        const fetchUser = await fetchResponse.json();
-        const isFetchUserValid = !(fetchUser.code && fetchUser.code === 10013);
-
-        if (!isFetchUserValid) return false;
-        return fetchUser.global_name;
-    },
 };
 
 export const openai = new OpenAIApi(

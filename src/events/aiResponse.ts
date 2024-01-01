@@ -103,14 +103,9 @@ const event: EventFile = {
         }
 
         // Replace placeholders.
-        const userNickname = message.guildId
-            ? utilFuncs.getUserCache(message.guildId, message.author.id)
-                  ?.nickname
-            : "{not-found}";
         const foundNickname =
-            (userNickname
-                ? userNickname
-                : await utilFuncs.getUserGlobalName(message.author.id)) ||
+            message.author.displayName ??
+            message.author.globalName ??
             "{not-found}";
         const guildName = message.guildId
             ? utilFuncs.getGuildCache(message.guildId)?.name
