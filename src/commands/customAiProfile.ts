@@ -87,7 +87,6 @@ const command: CommandFile = {
 
                 const updatedCustomAiProfile =
                     await prismaUtils.customAiProfile.update(
-                        interaction.channelId,
                         foundCustomAiProfile.id,
                         {
                             name,

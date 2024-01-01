@@ -15,6 +15,7 @@ const guild = {
                     },
                 },
             });
+
             return createdGuild;
         }
 
@@ -492,8 +493,6 @@ const customAiProfile = {
         },
         guildId: string
     ) => {
-        const existingGuild =
-            (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
         const existingUser =
             (await user.findFirst(userId)) ?? (await user.create(userId));
 
@@ -516,7 +515,6 @@ const customAiProfile = {
         }
     },
     update: async (
-        channelId: string,
         id: number,
         arg: {
             name: string;
