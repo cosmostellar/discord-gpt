@@ -113,11 +113,11 @@ export const utilFuncs = {
         return client.channels.cache.get(channelId);
     },
     getUserCache: (guildId: string, userId: string) => {
-        let guild = client.guilds.cache.get(guildId);
+        const guild = client.guilds.cache.get(guildId);
 
         if (!guild) return;
 
-        let member = guild.members.cache.get(userId);
+        const member = guild.members.cache.get(userId);
         return member;
     },
     sendMessage: async (channelId: string, msg: string) => {

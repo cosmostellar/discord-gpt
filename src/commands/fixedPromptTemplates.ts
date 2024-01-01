@@ -91,51 +91,54 @@ const command: CommandFile = {
                 break;
 
             case "delete":
-                const pickedIndex = interaction.options.get("index")
-                    ?.value as number;
+                {
+                    const pickedIndex = interaction.options.get("index")
+                        ?.value as number;
 
-                const guildTemplates =
-                    await prismaUtils.fixedPromptTemplate.findSortedMany(
-                        interaction.channelId,
-                        interaction.guildId
-                    );
-
-                if (
-                    pickedIndex >= 1 &&
-                    guildTemplates &&
-                    pickedIndex < guildTemplates.length
-                ) {
-                    const { id } = guildTemplates?.sort()[pickedIndex + 1];
-
-                    const isSuccessful =
-                        await prismaUtils.fixedPromptTemplate.delete(
+                    const guildTemplates =
+                        await prismaUtils.fixedPromptTemplate.findSortedMany(
                             interaction.channelId,
-                            id,
                             interaction.guildId
                         );
 
-                    if (!isSuccessful) {
+                    if (
+                        pickedIndex >= 1 &&
+                        guildTemplates &&
+                        pickedIndex < guildTemplates.length
+                    ) {
+                        const { id } = guildTemplates.sort()[pickedIndex + 1];
+
+                        const isSuccessful =
+                            await prismaUtils.fixedPromptTemplate.delete(
+                                interaction.channelId,
+                                id,
+                                interaction.guildId
+                            );
+
+                        if (!isSuccessful) {
+                            return await interaction.editReply({
+                                content: "Please try again later. 😢",
+                            });
+                        }
+
+                        return await interaction.editReply({
+                            content:
+                                "Successfully deleted a template. Please check the template list.",
+                        });
+                    } else if (
+                        guildTemplates &&
+                        (pickedIndex < 1 ||
+                            pickedIndex >= guildTemplates.length)
+                    ) {
+                        return await interaction.editReply({
+                            content:
+                                "Index is not valid. Check the list and try again. 😢",
+                        });
+                    } else {
                         return await interaction.editReply({
                             content: "Please try again later. 😢",
                         });
                     }
-
-                    return await interaction.editReply({
-                        content:
-                            "Successfully deleted a template. Please check the template list.",
-                    });
-                } else if (
-                    guildTemplates &&
-                    (pickedIndex < 1 || pickedIndex >= guildTemplates.length)
-                ) {
-                    return await interaction.editReply({
-                        content:
-                            "Index is not valid. Check the list and try again. 😢",
-                    });
-                } else {
-                    return await interaction.editReply({
-                        content: "Please try again later. 😢",
-                    });
                 }
                 break;
         }

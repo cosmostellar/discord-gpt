@@ -218,7 +218,7 @@ const command: CommandFile = {
                         break;
                 }
                 break;
-            case "template":
+            case "template": {
                 if (!interaction.guildId) {
                     return await interaction.reply({
                         content:
@@ -260,84 +260,84 @@ const command: CommandFile = {
                             });
                         }
                         break;
-                    case "select":
-                        {
-                            await interaction.deferReply({ ephemeral: true });
+                    case "select": {
+                        await interaction.deferReply({ ephemeral: true });
 
-                            const pickedIndex = interaction.options.get("index")
-                                ?.value as number;
+                        const pickedIndex = interaction.options.get("index")
+                            ?.value as number;
 
-                            const existingFixedPrompt =
-                                await prismaUtils.fixedPrompt.findFirst(
-                                    interaction.channelId,
-                                    interaction.user.id,
-                                    interaction.guildId
-                                );
+                        const existingFixedPrompt =
+                            await prismaUtils.fixedPrompt.findFirst(
+                                interaction.channelId,
+                                interaction.user.id,
+                                interaction.guildId
+                            );
 
-                            const selectedTemplate =
-                                guildTemplates?.[pickedIndex - 1];
+                        const selectedTemplate =
+                            guildTemplates?.[pickedIndex - 1];
 
-                            if (
-                                selectedTemplate &&
-                                (pickedIndex > 0 ||
-                                    pickedIndex < guildTemplates.length)
-                            ) {
-                                let isSuccessful = false;
+                        if (
+                            selectedTemplate &&
+                            (pickedIndex > 0 ||
+                                pickedIndex < guildTemplates.length)
+                        ) {
+                            let isSuccessful = false;
 
-                                if (!existingFixedPrompt) {
-                                    const createdFixedPrompt =
-                                        await prismaUtils.fixedPrompt.create(
-                                            interaction.channelId,
-                                            interaction.user.id,
-                                            {
-                                                prompt: selectedTemplate.message,
-                                                isTemplate: true,
-                                            },
-                                            interaction.guildId
-                                        );
+                            if (!existingFixedPrompt) {
+                                const createdFixedPrompt =
+                                    await prismaUtils.fixedPrompt.create(
+                                        interaction.channelId,
+                                        interaction.user.id,
+                                        {
+                                            prompt: selectedTemplate.message,
+                                            isTemplate: true,
+                                        },
+                                        interaction.guildId
+                                    );
 
-                                    if (createdFixedPrompt) {
-                                        isSuccessful = true;
-                                    }
-                                } else {
-                                    isSuccessful =
-                                        await prismaUtils.fixedPrompt.update(
-                                            interaction.channelId,
-                                            existingFixedPrompt.id,
-                                            {
-                                                prompt: selectedTemplate.message,
-                                                isTemplate: true,
-                                            },
-                                            interaction.guildId
-                                        );
+                                if (createdFixedPrompt) {
+                                    isSuccessful = true;
                                 }
-
-                                if (!isSuccessful) {
-                                    return await interaction.editReply({
-                                        content: "Please try again later. 😢",
-                                    });
-                                }
-
-                                return await interaction.editReply({
-                                    content: `Now using a fixed prompt template: \n \`${selectedTemplate.name}\``,
-                                });
-                            } else if (
-                                guildTemplates &&
-                                (pickedIndex < 1 ||
-                                    pickedIndex >= guildTemplates.length)
-                            ) {
-                                return await interaction.editReply({
-                                    content:
-                                        "There is no template with the index. Please try again! 😢",
-                                });
                             } else {
+                                isSuccessful =
+                                    await prismaUtils.fixedPrompt.update(
+                                        interaction.channelId,
+                                        existingFixedPrompt.id,
+                                        {
+                                            prompt: selectedTemplate.message,
+                                            isTemplate: true,
+                                        },
+                                        interaction.guildId
+                                    );
+                            }
+
+                            if (!isSuccessful) {
                                 return await interaction.editReply({
                                     content: "Please try again later. 😢",
                                 });
                             }
+
+                            return await interaction.editReply({
+                                content: `Now using a fixed prompt template: \n \`${selectedTemplate.name}\``,
+                            });
+                        } else if (
+                            guildTemplates &&
+                            (pickedIndex < 1 ||
+                                pickedIndex >= guildTemplates.length)
+                        ) {
+                            return await interaction.editReply({
+                                content:
+                                    "There is no template with the index. Please try again! 😢",
+                            });
+                        } else {
+                            return await interaction.editReply({
+                                content: "Please try again later. 😢",
+                            });
                         }
-                        break;
+                    }
                 }
+                break;
+            }
         }
     },
 };

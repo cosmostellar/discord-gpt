@@ -52,22 +52,45 @@ const command: CommandFile = {
 
         switch (subCommand) {
             case "set":
-                await interaction.deferReply({ ephemeral: true });
+                {
+                    await interaction.deferReply({ ephemeral: true });
 
-                const name = interaction.options.get("name")?.value as string;
-                const avatarUrl = interaction.options.get("profile-url")
-                    ?.value as string;
+                    const name = interaction.options.get("name")
+                        ?.value as string;
+                    const avatarUrl = interaction.options.get("profile-url")
+                        ?.value as string;
 
-                const foundCustomAiProfile =
-                    await prismaUtils.customAiProfile.findFirst(
-                        interaction.user.id,
-                        interaction.guildId
-                    );
-
-                if (!foundCustomAiProfile) {
-                    const createdCustomAiProfile =
-                        await prismaUtils.customAiProfile.create(
+                    const foundCustomAiProfile =
+                        await prismaUtils.customAiProfile.findFirst(
                             interaction.user.id,
+                            interaction.guildId
+                        );
+
+                    if (!foundCustomAiProfile) {
+                        const createdCustomAiProfile =
+                            await prismaUtils.customAiProfile.create(
+                                interaction.user.id,
+                                {
+                                    name,
+                                    avatar: avatarUrl,
+                                },
+                                interaction.guildId
+                            );
+
+                        if (!createdCustomAiProfile) {
+                            return await interaction.editReply({
+                                content: "Please try again later. 😢",
+                            });
+                        }
+
+                        return interaction.editReply({
+                            content: "Successfully set the AI profile! ✅",
+                        });
+                    }
+
+                    const updatedCustomAiProfile =
+                        await prismaUtils.customAiProfile.update(
+                            foundCustomAiProfile.id,
                             {
                                 name,
                                 avatar: avatarUrl,
@@ -75,7 +98,7 @@ const command: CommandFile = {
                             interaction.guildId
                         );
 
-                    if (!createdCustomAiProfile) {
+                    if (!updatedCustomAiProfile) {
                         return await interaction.editReply({
                             content: "Please try again later. 😢",
                         });
@@ -85,46 +108,28 @@ const command: CommandFile = {
                         content: "Successfully set the AI profile! ✅",
                     });
                 }
-
-                const updatedCustomAiProfile =
-                    await prismaUtils.customAiProfile.update(
-                        foundCustomAiProfile.id,
-                        {
-                            name,
-                            avatar: avatarUrl,
-                        },
-                        interaction.guildId
-                    );
-
-                if (!updatedCustomAiProfile) {
-                    return await interaction.editReply({
-                        content: "Please try again later. 😢",
-                    });
-                }
-
-                return interaction.editReply({
-                    content: "Successfully set the AI profile! ✅",
-                });
                 break;
 
             case "remove":
-                await interaction.deferReply({ ephemeral: true });
+                {
+                    await interaction.deferReply({ ephemeral: true });
 
-                const isCustomAiProfileDeleted =
-                    await prismaUtils.customAiProfile.deleteMany(
-                        interaction.user.id,
-                        interaction.guildId
+                    const isCustomAiProfileDeleted =
+                        await prismaUtils.customAiProfile.deleteMany(
+                            interaction.user.id,
+                            interaction.guildId
+                        );
+
+                    if (!isCustomAiProfileDeleted) {
+                        return await interaction.editReply({
+                            content: "Please try again later. 😢",
+                        });
+                    }
+
+                    return await interaction.editReply(
+                        "AI profile successfully removed! ✅"
                     );
-
-                if (!isCustomAiProfileDeleted) {
-                    return await interaction.editReply({
-                        content: "Please try again later. 😢",
-                    });
                 }
-
-                return await interaction.editReply(
-                    "AI profile successfully removed! ✅"
-                );
                 break;
 
             default:

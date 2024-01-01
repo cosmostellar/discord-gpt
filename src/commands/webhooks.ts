@@ -47,40 +47,46 @@ const command: CommandFile = {
 
         switch (subCommand) {
             case "add":
-                let isExisting = false;
+                {
+                    let isExisting = false;
 
-                if (channel instanceof TextChannel) {
-                    const existingWebhooks =
-                        (await channel.fetchWebhooks()) || undefined;
+                    if (channel instanceof TextChannel) {
+                        const existingWebhooks =
+                            (await channel.fetchWebhooks()) || undefined;
 
-                    existingWebhooks?.forEach((oneWebhook) => {
-                        if (oneWebhook.name === configData.webhookName) {
-                            if (
-                                oneWebhook.owner?.id ===
-                                utilFuncs.getClientUser()?.id
-                            ) {
-                                isExisting = true;
-                            } else {
-                                oneWebhook?.delete();
+                        existingWebhooks?.forEach((oneWebhook) => {
+                            if (oneWebhook.name === configData.webhookName) {
+                                if (
+                                    oneWebhook.owner?.id ===
+                                    utilFuncs.getClientUser()?.id
+                                ) {
+                                    isExisting = true;
+                                } else {
+                                    oneWebhook?.delete();
+                                }
+                            }
+                        });
+
+                        if (!isExisting) {
+                            try {
+                                await channel.createWebhook({
+                                    name: configData.webhookName,
+                                    avatar: isValidHttpUrl(
+                                        configData.webhookImgUrl
+                                    )
+                                        ? configData.webhookImgUrl
+                                        : null,
+                                });
+                            } catch (error) {
+                                console.log(error);
                             }
                         }
-                    });
-
-                    if (!isExisting) {
-                        try {
-                            await channel.createWebhook({
-                                name: configData.webhookName,
-                                avatar: isValidHttpUrl(configData.webhookImgUrl)
-                                    ? configData.webhookImgUrl
-                                    : null,
-                            });
-                        } catch (error) {
-                            console.log(error);
-                        }
                     }
-                }
 
-                return await interaction.reply("Webhook successfully added.");
+                    return await interaction.reply(
+                        "Webhook successfully added."
+                    );
+                }
                 break;
 
             case "remove":
@@ -111,9 +117,8 @@ const command: CommandFile = {
                             "There is no webhook to remove."
                         );
                     }
-                    break;
                 }
-
+                break;
             default:
                 break;
         }
