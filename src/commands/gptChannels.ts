@@ -64,14 +64,13 @@ const command: CommandFile = {
                 );
 
                 if (createdChannel && createdChannel.guildId) {
-                    const updatedChannel =
-                        await prismaUtils.channel.updateGptChannel(
-                            createdChannel.id,
-                            {
-                                isGptChannel: true,
-                            },
-                            createdChannel.guildId
-                        );
+                    await prismaUtils.channel.updateGptChannel(
+                        createdChannel.id,
+                        {
+                            isGptChannel: true,
+                        },
+                        createdChannel.guildId
+                    );
                 }
 
                 if (createdChannel) {

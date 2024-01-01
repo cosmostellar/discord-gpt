@@ -158,8 +158,9 @@ const event: EventFile = {
             .catch((error) => {
                 isTyping = false;
                 replyMessage(message, "Please try again later.");
-                console.log(`OPENAI ERR: ${error}`);
+                throw new Error(`OPENAI ERR: ${error}`);
             });
+
         if (!result) {
             return replyMessage(message, "Please try again later.");
         }
@@ -184,14 +185,16 @@ const event: EventFile = {
                 });
             } catch (error) {
                 isTyping = false;
-                console.log(`ERR: ${error}`);
+                replyMessage(message, "Please try again later.");
+                throw new Error(error as string);
             }
         } else {
             try {
                 replyMessage(message, reply.content);
             } catch (error) {
                 isTyping = false;
-                console.log(`ERR: ${error}`);
+                replyMessage(message, "Please try again later.");
+                throw new Error(error as string);
             }
         }
 
@@ -236,13 +239,11 @@ const replyMessage = async (
             channelId: discordMessage.channelId,
             content: inputMessage,
         });
-        tempMsg?.delete().catch((e) => {
-            console.log(e);
-        });
+        tempMsg?.delete();
     } else {
         discordMessage.reply(inputMessage).catch((error) => {
             isTyping = false;
-            console.log(error);
+            throw new Error(error);
         });
     }
 };

@@ -157,6 +157,7 @@ const command: CommandFile = {
                                     interaction.user.id,
                                     interaction.guildId ?? undefined
                                 );
+
                             if (!existingFixedPrompts) {
                                 return await interaction.editReply({
                                     content: "Please try again later. 😢",
@@ -186,7 +187,7 @@ const command: CommandFile = {
                                     interaction.guildId ?? undefined
                                 );
 
-                            let isTemplate: boolean = false;
+                            let isTemplate = false;
 
                             foundFixedPrompt?.user.fixedPrompt.forEach(
                                 (prompt) => {

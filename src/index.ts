@@ -53,14 +53,21 @@ const registerCommands = () => {
         const command = interaction.client.commands.get(
             interaction.commandName
         );
-
         if (!command) {
             throw new Error(
                 `No command with a matching name ${interaction.commandName} was found.`
             );
         }
 
-        await command.execute(interaction);
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.log(error);
+            await utilFuncs.sendMessage(
+                interaction.channelId,
+                "Something went wrong! Please try again later."
+            );
+        }
     });
 };
 registerCommands();
@@ -78,9 +85,21 @@ const registerEvents = () => {
         const event: EventFile = (await import(filePath)).default;
 
         if (event.once) {
-            client.once(event.name, (...args) => event.execute(...args));
+            client.once(event.name, async (...args) => {
+                try {
+                    await event.execute(...args);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
         } else {
-            client.on(event.name, (...args) => event.execute(...args));
+            client.on(event.name, async (...args) => {
+                try {
+                    await event.execute(...args);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
         }
     });
 };

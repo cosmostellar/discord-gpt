@@ -74,6 +74,7 @@ const command: CommandFile = {
                             },
                             interaction.guildId
                         );
+
                     if (!createdCustomAiProfile) {
                         return await interaction.editReply({
                             content: "Please try again later. 😢",
@@ -94,6 +95,7 @@ const command: CommandFile = {
                         },
                         interaction.guildId
                     );
+
                 if (!updatedCustomAiProfile) {
                     return await interaction.editReply({
                         content: "Please try again later. 😢",
@@ -108,13 +110,13 @@ const command: CommandFile = {
             case "remove":
                 await interaction.deferReply({ ephemeral: true });
 
-                const deletedCustomAiProfile =
+                const isCustomAiProfileDeleted =
                     await prismaUtils.customAiProfile.deleteMany(
                         interaction.user.id,
                         interaction.guildId
                     );
 
-                if (!deletedCustomAiProfile) {
+                if (!isCustomAiProfileDeleted) {
                     return await interaction.editReply({
                         content: "Please try again later. 😢",
                     });

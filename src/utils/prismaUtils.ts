@@ -373,7 +373,7 @@ const fixedPromptTemplate = {
 
             return Boolean(deletedFixedPromptTemplate);
         } else {
-            return;
+            return false;
         }
     },
 };
@@ -539,6 +539,8 @@ const customAiProfile = {
 
             return Boolean(changedPredefinedPrompt);
         }
+
+        return null;
     },
     deleteMany: async (userId: string, guildId: string) => {
         const existingGuild =
@@ -551,10 +553,12 @@ const customAiProfile = {
                         guildId,
                         userId,
                     },
-                })) ?? null;
+                })) ?? false;
 
             return deletedWebhookCustom && deletedWebhookCustom.count > 0;
         }
+
+        return false;
     },
 };
 

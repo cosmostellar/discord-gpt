@@ -61,9 +61,7 @@ const command: CommandFile = {
                             ) {
                                 isExisting = true;
                             } else {
-                                oneWebhook?.delete().catch((e) => {
-                                    console.log(e);
-                                });
+                                oneWebhook?.delete();
                             }
                         }
                     });
@@ -97,9 +95,7 @@ const command: CommandFile = {
                                 oneWebhook.owner?.id ===
                                 utilFuncs.getClientUser()?.id
                             ) {
-                                oneWebhook.delete().catch((e) => {
-                                    console.log(e);
-                                });
+                                oneWebhook.delete();
 
                                 isSuccessful = true;
                             }
