@@ -8,8 +8,7 @@ const command: CommandFile = {
         .setDescription("Check the chatbot ping."),
 
     execute: async (interaction) => {
-        const client = interaction.client;
-        const ping = client.ws.ping;
+        const ping = interaction.client.ws.ping;
 
         if (ping === -1) {
             return await interaction.reply("Try again later.");
