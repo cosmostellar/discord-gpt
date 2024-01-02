@@ -5,7 +5,7 @@ import { guild as prismaGuild } from "../utils/prismaUtils";
 
 const event: EventFile = {
     name: Events.GuildDelete,
-    once: true,
+    once: false,
     execute: async (guild: Guild) => {
         await prismaGuild.delete(guild.id);
     },

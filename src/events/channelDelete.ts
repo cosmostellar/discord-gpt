@@ -5,7 +5,7 @@ import { channel as prismaChannel } from "../utils/prismaUtils";
 
 const event: EventFile = {
     name: Events.ChannelDelete,
-    once: true,
+    once: false,
     execute: async (channel: Channel) => {
         await prismaChannel.delete(channel.id);
     },
