@@ -63,8 +63,7 @@ const registerCommands = () => {
             await command.execute(interaction);
         } catch (error) {
             console.log(error);
-            await utilFuncs.sendMessage(
-                interaction.channelId,
+            await interaction.reply(
                 "Something went wrong! Please try again later."
             );
         }
@@ -106,21 +105,10 @@ const registerEvents = () => {
 registerEvents();
 
 export const utilFuncs = {
-    getGuildCache: (guildId: string) => {
-        return client.guilds.cache.get(guildId);
-    },
-    getChannelCache: (channelId: string) => {
+    getChannelCache: (client: Client, channelId: string) => {
         return client.channels.cache.get(channelId);
     },
-    getUserCache: (guildId: string, userId: string) => {
-        const guild = client.guilds.cache.get(guildId);
-
-        if (!guild) return;
-
-        const member = guild.members.cache.get(userId);
-        return member;
-    },
-    sendMessage: async (channelId: string, msg: string) => {
+    sendMessage: async (client: Client, channelId: string, msg: string) => {
         const channel = client.channels.cache.get(channelId);
 
         if (!(channel instanceof TextChannel)) return;
@@ -131,9 +119,6 @@ export const utilFuncs = {
         } catch (err) {
             console.log(err);
         }
-    },
-    getClientUser: () => {
-        return client.user;
     },
 };
 

@@ -43,7 +43,10 @@ const command: CommandFile = {
         ).getSubcommand();
         const [, configData] = readJson<ConfigData>("config.json");
 
-        const channel = utilFuncs.getChannelCache(interaction.channelId);
+        const channel = utilFuncs.getChannelCache(
+            interaction.client,
+            interaction.channelId
+        );
 
         switch (subCommand) {
             case "add":
@@ -58,7 +61,7 @@ const command: CommandFile = {
                             if (oneWebhook.name === configData.webhookName) {
                                 if (
                                     oneWebhook.owner?.id ===
-                                    utilFuncs.getClientUser()?.id
+                                    interaction.client.user?.id
                                 ) {
                                     isExisting = true;
                                 } else {
@@ -99,7 +102,7 @@ const command: CommandFile = {
                         if (oneWebhook.name === configData.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
-                                utilFuncs.getClientUser()?.id
+                                interaction.client.user?.id
                             ) {
                                 oneWebhook.delete();
 

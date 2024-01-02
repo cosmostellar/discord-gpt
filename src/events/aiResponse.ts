@@ -9,7 +9,7 @@ import {
 import { readJson } from "json-helper-toolkit";
 import { ChatCompletionRequestMessage } from "openai";
 
-import { openai, utilFuncs } from "../index";
+import { openai } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
@@ -107,9 +107,7 @@ const event: EventFile = {
             message.author.displayName ??
             message.author.globalName ??
             "{not-found}";
-        const guildName = message.guildId
-            ? utilFuncs.getGuildCache(message.guildId)?.name
-            : "{not-found}";
+        const guildName = message.guildId ? message.guild?.name : "{not-found}";
         const channelName = !isDM ? message.channel.name : "{not-found}";
 
         if (fixedPromptData && fixedPrompt) {
@@ -230,6 +228,7 @@ const replyMessage = async (
         const tempMsg = await discordMessage.channel.send("[Processing...]");
 
         await sendWebhookMessage({
+            client: discordMessage.client,
             guildId: discordMessage.guildId,
             userId: discordMessage.author.id,
             channelId: discordMessage.channelId,
@@ -264,14 +263,14 @@ const checkAvailability = async (message: Message, isDM: boolean) => {
         isAvailableChannel = false;
     }
     message.mentions.users.forEach((one) => {
-        if (one.id === utilFuncs.getClientUser()?.id) {
+        if (one.id === message.client.user?.id) {
             isAvailableChannel = true;
         }
     });
     // Answer the message if the bot was mentioned.
     // It still replies even when the channel is not a GPT channel.
     message.mentions.users.forEach((one) => {
-        if (one.id === utilFuncs.getClientUser()?.id) {
+        if (one.id === message.client.user?.id) {
             isAvailableChannel = true;
         }
     });
@@ -295,7 +294,7 @@ const getChatLog = async (
         const readingMessage: Message = prevMessages[i][1];
 
         if (
-            readingMessage.author.id === utilFuncs.getClientUser()?.id &&
+            readingMessage.author.id === message.client.user?.id &&
             !readingMessage.webhookId
         ) {
             // If the message was created by the chatbot.
