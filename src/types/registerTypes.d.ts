@@ -6,7 +6,9 @@ import {
 } from "discord.js";
 
 export interface CommandFile {
-    data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+    data:
+        | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
+        | SlashCommandSubcommandsOnlyBuilder;
     execute: (interaction: CommandInteraction) => any;
 }
 
