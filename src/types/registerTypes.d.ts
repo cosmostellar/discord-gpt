@@ -2,13 +2,15 @@ import {
     CommandInteraction,
     Events,
     SlashCommandBuilder,
+    SlashCommandOptionsOnlyBuilder,
     SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
 
 export interface CommandFile {
     data:
-        | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">
-        | SlashCommandSubcommandsOnlyBuilder;
+        | SlashCommandBuilder
+        | SlashCommandSubcommandsOnlyBuilder
+        | SlashCommandOptionsOnlyBuilder;
     execute: (interaction: CommandInteraction) => any;
 }
 
