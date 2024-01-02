@@ -197,6 +197,7 @@ const event: EventFile = {
     },
 };
 
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
 const executeAsync = (func: (...args: any[]) => any, channel: TextChannel) => {
     setTimeout(func, 0, channel);
 };
@@ -288,7 +289,7 @@ const getChatLog = async (
         content: string;
     }
     // Read the latest messages and push required ones in an array named 'chatLog'.
-    let chatLog: ChatLog[] = [];
+    const chatLog: ChatLog[] = [];
 
     for (let i = 0; i < prevMessages.length; i++) {
         const readingMessage: Message = prevMessages[i][1];
