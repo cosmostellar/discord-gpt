@@ -3,6 +3,7 @@ import {
     Events,
     GuildChannel,
     Message,
+    MessageMentionOptions,
     PermissionFlagsBits,
     TextChannel,
 } from "discord.js";
@@ -236,10 +237,15 @@ const replyMessage = async (
         });
         tempMsg?.delete();
     } else {
-        discordMessage.reply(inputMessage).catch((error) => {
-            isTyping = false;
-            throw new Error(error);
-        });
+        discordMessage
+            .reply({
+                content: inputMessage,
+                allowedMentions: { repliedUser: false },
+            })
+            .catch((error) => {
+                isTyping = false;
+                throw new Error(error);
+            });
     }
 };
 
