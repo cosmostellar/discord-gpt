@@ -76,7 +76,7 @@ const command: CommandFile = {
                     }
 
                     return await interaction.editReply({
-                        content: "Ignoring prefix was successfully added! ✅",
+                        content: "Ignoring prefix is successfully added! ✅",
                     });
                 }
                 break;
