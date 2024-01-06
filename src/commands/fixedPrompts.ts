@@ -171,7 +171,7 @@ const command: CommandFile = {
                             );
 
                             return await interaction.editReply(
-                                "Fixed prompt for this channel has been removed. ✅"
+                                "Fixed prompt for this channel is successfully removed. ✅"
                             );
                         }
                         break;
@@ -318,7 +318,7 @@ const command: CommandFile = {
                             }
 
                             return await interaction.editReply({
-                                content: `Now using a fixed prompt template: \n \`${selectedTemplate.name}\``,
+                                content: `Now using the following fixed prompt template: \n \`${selectedTemplate.name}\``,
                             });
                         } else if (
                             guildTemplates &&
