@@ -10,7 +10,8 @@ export interface CommandFile {
     data:
         | SlashCommandBuilder
         | SlashCommandSubcommandsOnlyBuilder
-        | SlashCommandOptionsOnlyBuilder;
+        | SlashCommandOptionsOnlyBuilder
+        | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
     execute: (interaction: CommandInteraction) => any;
 }
 
