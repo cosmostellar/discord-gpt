@@ -1,9 +1,9 @@
 import {
     ChannelType,
+    DiscordAPIError,
     Events,
     GuildChannel,
     Message,
-    MessageMentionOptions,
     PermissionFlagsBits,
     TextChannel,
 } from "discord.js";
@@ -144,7 +144,7 @@ const event: EventFile = {
         }
 
         // Get a response from AI.
-        const result = await openai
+        const response = await openai
             .createChatCompletion({
                 model: "gpt-3.5-turbo",
                 messages: chatLog as ChatCompletionRequestMessage[],
@@ -155,7 +155,7 @@ const event: EventFile = {
                 throw new Error(`OPENAI ERR: ${error}`);
             });
 
-        if (!result) {
+        if (!response) {
             return replyMessage(message, "Please try again later.");
         }
 
@@ -167,7 +167,7 @@ const event: EventFile = {
             finish_reason: string;
             index: number;
         }
-        const { message: reply }: Choice = result.data.choices[0] as Choice;
+        const { message: reply }: Choice = response.data.choices[0] as Choice;
 
         // Send Reply. If the answer's too long. Separate them into multiple messages.
         if (reply.content.length >= 1999) {
@@ -228,24 +228,50 @@ const replyMessage = async (
         isTyping = false;
         const tempMsg = await discordMessage.channel.send("[Processing...]");
 
-        await sendWebhookMessage({
-            client: discordMessage.client,
-            guildId: discordMessage.guildId,
-            userId: discordMessage.author.id,
-            channelId: discordMessage.channelId,
-            content: inputMessage,
-        });
+        try {
+            await sendWebhookMessage({
+                client: discordMessage.client,
+                guildId: discordMessage.guildId,
+                userId: discordMessage.author.id,
+                channelId: discordMessage.channelId,
+                content: inputMessage,
+            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error) {
+            if (
+                error instanceof DiscordAPIError &&
+                (error.message.includes("Invalid Form Body"),
+                error.code == 50035)
+            ) {
+                console.log(
+                    "Someone deleted the message before the bot replied."
+                );
+            } else {
+                console.log(error);
+            }
+        }
+
         tempMsg?.delete();
     } else {
-        discordMessage
-            .reply({
+        try {
+            await discordMessage.reply({
                 content: inputMessage,
                 allowedMentions: { repliedUser: false },
-            })
-            .catch((error) => {
-                isTyping = false;
-                throw new Error(error);
             });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error) {
+            if (
+                error instanceof DiscordAPIError &&
+                (error.message.includes("Invalid Form Body"),
+                error.code == 50035)
+            ) {
+                console.log(
+                    "Someone deleted the message before the bot replied."
+                );
+            } else {
+                console.log(error);
+            }
+        }
     }
 };
 
