@@ -19,7 +19,7 @@ import { delay, sendWebhookMessage } from "../utils/utilFunctions";
 const event: EventFile = {
     name: Events.MessageCreate,
     once: false,
-    async execute(message: Message) {
+    execute: async (message: Message) => {
         // Get channel data from the database.
         const isDM = message.channel?.type === ChannelType.DM;
 
