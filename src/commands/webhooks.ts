@@ -40,7 +40,11 @@ const command: CommandFile = {
             interaction.options as CommandInteractionOptionResolver
         ).getSubcommand();
 
-        if (!configJSON.webhookName) return;
+        if (!configJSON.webhookName) {
+            return await interaction.reply({
+                content: "Webhook name cannot be empty. 🚫",
+            });
+        }
 
         const channel = otherUtils.getChannelCache(
             interaction.client,
