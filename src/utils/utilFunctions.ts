@@ -1,7 +1,6 @@
 import { Client, TextChannel } from "discord.js";
-import { readJson } from "json-helper-toolkit";
 
-import { ConfigData } from "../types/jsonData";
+import configJSON from "../../config.json";
 import * as prismaUtils from "./prismaUtils";
 
 export const asyncUtils = {
@@ -62,15 +61,14 @@ export const webhookUtils = {
             }
 
             const webhooks = await channel.fetchWebhooks();
-            const [, configData] = readJson<ConfigData>("config.json");
-            if (!configData) return;
+            if (!configJSON || !configJSON.webhookName) return;
 
             let messageSent = false;
 
             try {
                 webhooks?.forEach((webhook) => {
                     if (
-                        webhook.name === configData.webhookName &&
+                        webhook.name === configJSON.webhookName &&
                         webhook.owner?.id === client.user?.id
                     ) {
                         webhook.send({
@@ -120,13 +118,12 @@ export const webhookUtils = {
             }
 
             const webhooks = await channel.fetchWebhooks();
-            const [, configData] = readJson<ConfigData>("config.json");
-            if (!configData) return;
+            if (!configJSON || !configJSON.webhookName) return;
 
             let messageSent = false;
             try {
                 webhooks.forEach(async (webhook) => {
-                    if (webhook.name === configData.webhookName) {
+                    if (webhook.name === configJSON.webhookName) {
                         webhook.send({
                             content,
                             username: webhookName,

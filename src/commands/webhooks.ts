@@ -5,9 +5,8 @@ import {
     SlashCommandBuilder,
     TextChannel,
 } from "discord.js";
-import { readJson } from "json-helper-toolkit";
 
-import { ConfigData } from "../types/jsonData";
+import configJSON from "../../config.json";
 import { CommandFile } from "../types/registerTypes";
 import { otherUtils, webhookUtils } from "../utils/utilFunctions";
 
@@ -40,7 +39,8 @@ const command: CommandFile = {
         const subCommand = (
             interaction.options as CommandInteractionOptionResolver
         ).getSubcommand();
-        const [, configData] = readJson<ConfigData>("config.json");
+
+        if (!configJSON.webhookName) return;
 
         const channel = otherUtils.getChannelCache(
             interaction.client,
@@ -57,7 +57,7 @@ const command: CommandFile = {
                             (await channel.fetchWebhooks()) || undefined;
 
                         existingWebhooks?.forEach((oneWebhook) => {
-                            if (oneWebhook.name === configData.webhookName) {
+                            if (oneWebhook.name === configJSON.webhookName) {
                                 if (
                                     oneWebhook.owner?.id ===
                                     interaction.client.user?.id
@@ -72,11 +72,11 @@ const command: CommandFile = {
                         if (!isExisting) {
                             try {
                                 await channel.createWebhook({
-                                    name: configData.webhookName,
+                                    name: configJSON.webhookName,
                                     avatar: webhookUtils.isValidHttpUrl(
-                                        configData.webhookImgUrl
+                                        configJSON.webhookImgUrl
                                     )
-                                        ? configData.webhookImgUrl
+                                        ? configJSON.webhookImgUrl
                                         : null,
                                 });
                             } catch (error) {
@@ -98,7 +98,7 @@ const command: CommandFile = {
                     let isSuccessful = false;
 
                     existingWebhooks?.forEach((oneWebhook) => {
-                        if (oneWebhook.name === configData.webhookName) {
+                        if (oneWebhook.name === configJSON.webhookName) {
                             if (
                                 oneWebhook.owner?.id ===
                                 interaction.client.user?.id

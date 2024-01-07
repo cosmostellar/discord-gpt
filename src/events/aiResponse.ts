@@ -7,11 +7,10 @@ import {
     PermissionFlagsBits,
     TextChannel,
 } from "discord.js";
-import { readJson } from "json-helper-toolkit";
 import { ChatCompletionRequestMessage } from "openai";
 
+import configJSON from "../../config.json";
 import { openai } from "../index";
-import { ConfigData } from "../types/jsonData";
 import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 import { asyncUtils, webhookUtils } from "../utils/utilFunctions";
@@ -69,11 +68,10 @@ const event: EventFile = {
         executeAsync(keepTyping, textChannel);
 
         // Get previous messages.
-        const [, { aiInputLimit }] = readJson<ConfigData>("config.json");
-        if (!aiInputLimit) return;
+        if (!configJSON || !configJSON.aiInputLimit) return;
 
         const prevMessagesCollection = await textChannel.messages.fetch({
-            limit: aiInputLimit,
+            limit: configJSON.aiInputLimit,
         });
         const prevMessages = [...prevMessagesCollection];
         if (prevMessages.length === 0) {

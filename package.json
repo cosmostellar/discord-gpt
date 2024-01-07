@@ -41,7 +41,6 @@
         "dotenv": "^16.3.1",
         "discord.js": "^14.11.0",
         "openai": "^3.3.0",
-        "@prisma/client": "^5.0.0",
-        "json-helper-toolkit": "^1.1.6"
+        "@prisma/client": "^5.0.0"
     }
 }
