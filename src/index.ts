@@ -104,24 +104,6 @@ const registerEvents = () => {
 };
 registerEvents();
 
-export const utilFuncs = {
-    getChannelCache: (client: Client, channelId: string) => {
-        return client.channels.cache.get(channelId);
-    },
-    sendMessage: async (client: Client, channelId: string, msg: string) => {
-        const channel = client.channels.cache.get(channelId);
-
-        if (!(channel instanceof TextChannel)) return;
-        if (!channel) return;
-
-        try {
-            await channel?.send(msg);
-        } catch (err) {
-            console.log(err);
-        }
-    },
-};
-
 export const openai = new OpenAIApi(
     new Configuration({
         apiKey: process.env.OPENAI_API_KEY,

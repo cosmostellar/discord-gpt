@@ -7,10 +7,9 @@ import {
 } from "discord.js";
 import { readJson } from "json-helper-toolkit";
 
-import { utilFuncs } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { CommandFile } from "../types/registerTypes";
-import { webhookUtils } from "../utils/utilFunctions";
+import { otherUtils, webhookUtils } from "../utils/utilFunctions";
 
 const command: CommandFile = {
     data: new SlashCommandBuilder()
@@ -43,7 +42,7 @@ const command: CommandFile = {
         ).getSubcommand();
         const [, configData] = readJson<ConfigData>("config.json");
 
-        const channel = utilFuncs.getChannelCache(
+        const channel = otherUtils.getChannelCache(
             interaction.client,
             interaction.channelId
         );
