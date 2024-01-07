@@ -10,7 +10,7 @@ import { readJson } from "json-helper-toolkit";
 import { utilFuncs } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { CommandFile } from "../types/registerTypes";
-import { isValidHttpUrl } from "../utils/utilFunctions";
+import { webhookUtils } from "../utils/utilFunctions";
 
 const command: CommandFile = {
     data: new SlashCommandBuilder()
@@ -74,7 +74,7 @@ const command: CommandFile = {
                             try {
                                 await channel.createWebhook({
                                     name: configData.webhookName,
-                                    avatar: isValidHttpUrl(
+                                    avatar: webhookUtils.isValidHttpUrl(
                                         configData.webhookImgUrl
                                     )
                                         ? configData.webhookImgUrl

@@ -14,7 +14,7 @@ import { openai } from "../index";
 import { ConfigData } from "../types/jsonData";
 import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
-import { delay, sendWebhookMessage } from "../utils/utilFunctions";
+import { asyncUtils, webhookUtils } from "../utils/utilFunctions";
 
 const event: EventFile = {
     name: Events.MessageCreate,
@@ -205,7 +205,7 @@ let isTyping = false;
 const keepTyping = async (channel: TextChannel) => {
     while (isTyping) {
         channel.sendTyping();
-        await delay(5000);
+        await asyncUtils.delay(5000);
     }
 };
 
@@ -229,7 +229,7 @@ const replyMessage = async (
         const tempMsg = await discordMessage.channel.send("[Processing...]");
 
         try {
-            await sendWebhookMessage({
+            await webhookUtils.sendWebhookMessage({
                 client: discordMessage.client,
                 guildId: discordMessage.guildId,
                 userId: discordMessage.author.id,
