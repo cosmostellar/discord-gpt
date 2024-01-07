@@ -4,7 +4,6 @@ import {
     Events,
     GatewayIntentBits,
     Partials,
-    TextChannel,
 } from "discord.js";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
