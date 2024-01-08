@@ -92,33 +92,41 @@ const event: EventFile = {
               )
             : null;
         let fixedPrompt = fixedPromptData?.prompt;
-        if (fixedPrompt) {
-            // Show warning message when "predefinedMsg" is longer than 1950 letters.
-            if (fixedPrompt !== "" && fixedPrompt.length >= 1950) {
-                return message.channel.send(
-                    "ERROR: Fixed prompt message cannot be empty or more than 1950 letters!"
-                );
-            }
+
+        // Show warning message when "predefinedMsg" is longer than 1950 letters.
+        if (fixedPrompt && fixedPrompt !== "" && fixedPrompt.length >= 1950) {
+            return message.channel.send(
+                "ERROR: Fixed prompt message cannot be empty or more than 1950 letters!"
+            );
         }
 
         // Replace placeholders.
-        const foundNickname =
+        const foundDisplayName =
             message.author.displayName ??
             message.author.globalName ??
             "{not-found}";
-        const guildName = message.guildId ? message.guild?.name : "{not-found}";
-        const channelName = !isDM ? message.channel.name : "{not-found}";
+        const foundGuildName = message.guild?.name ?? "{not-found}";
+        const foundChannelName = !isDM ? message.channel.name : "{not-found}";
 
         if (fixedPromptData && fixedPrompt) {
             // String replacements for fixed prompt messages.
-            while (fixedPrompt.includes("{user}")) {
-                fixedPrompt = fixedPrompt.replace("{user}", foundNickname);
+            while (fixedPrompt.includes("{displayName}")) {
+                fixedPrompt = fixedPrompt.replace(
+                    "{displayName}",
+                    foundDisplayName
+                );
             }
-            while (guildName && fixedPrompt.includes("{server}")) {
-                fixedPrompt = fixedPrompt.replace("{server}", guildName);
+            while (foundGuildName && fixedPrompt.includes("{guildName}")) {
+                fixedPrompt = fixedPrompt.replace(
+                    "{guildName}",
+                    foundGuildName
+                );
             }
-            while (fixedPrompt.includes("{channel}")) {
-                fixedPrompt = fixedPrompt.replace("{channel}", channelName);
+            while (fixedPrompt.includes("{channelName}")) {
+                fixedPrompt = fixedPrompt.replace(
+                    "{channelName}",
+                    foundChannelName
+                );
             }
 
             if (chatLog.length >= 2) {
@@ -154,7 +162,7 @@ const event: EventFile = {
             });
 
         if (!response) {
-            return replyMessage(message, "Please try again later.");
+            return await replyMessage(message, "Please try again later.");
         }
 
         interface Choice {
@@ -172,8 +180,8 @@ const event: EventFile = {
             const answerList = getAnswerList(reply);
 
             try {
-                answerList.forEach((answer) => {
-                    replyMessage(message, answer);
+                answerList.forEach(async (answer) => {
+                    await replyMessage(message, answer);
                 });
             } catch (error) {
                 isTyping = false;
@@ -182,7 +190,7 @@ const event: EventFile = {
             }
         } else {
             try {
-                replyMessage(message, reply.content);
+                await replyMessage(message, reply.content);
             } catch (error) {
                 isTyping = false;
                 replyMessage(message, "Please try again later.");
