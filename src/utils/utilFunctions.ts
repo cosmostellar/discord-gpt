@@ -16,7 +16,7 @@ interface SendWebhookMessageArgs {
     channelId: string;
     content: string;
 }
-interface sendWebhookArgs {
+interface SendSimpleWebhookArgs {
     client: Client;
     channelId: string;
     content: string;
@@ -36,6 +36,7 @@ export const webhookUtils = {
 
         return url.protocol === "http:" || url.protocol === "https:";
     },
+    // Works with "customAiProfile" command.
     sendWebhookMessage: async ({
         client,
         guildId,
@@ -47,108 +48,121 @@ export const webhookUtils = {
             userId,
             guildId
         );
+        const channelCache = otherUtils.getChannelCache(client, channelId);
 
-        const channel = otherUtils.getChannelCache(client, channelId);
+        if (!customAiProfileData || !(channelCache instanceof TextChannel))
+            return;
 
-        if (customAiProfileData && channel instanceof TextChannel) {
-            if (!webhookUtils.isValidHttpUrl(customAiProfileData.avatar)) {
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Image URL is not valid."
-                );
-                return;
-            }
+        if (!webhookUtils.isValidHttpUrl(customAiProfileData.avatar)) {
+            await otherUtils.sendMessage(
+                client,
+                channelCache.id,
+                "Image URL is not valid."
+            );
+            return;
+        }
 
-            const webhooks = await channel.fetchWebhooks();
-            if (!configJSON || !configJSON.webhookName) return;
+        if (!configJSON || !configJSON.webhookName) {
+            return await otherUtils.sendMessage(
+                client,
+                channelCache.id,
+                "Config file is not found or not valid."
+            );
+        }
 
-            let messageSent = false;
+        const webhooks = await channelCache.fetchWebhooks();
+        let messageSent = false;
 
-            try {
-                webhooks?.forEach((webhook) => {
-                    if (
-                        webhook.name === configJSON.webhookName &&
-                        webhook.owner?.id === client.user?.id
-                    ) {
-                        webhook.send({
-                            content,
-                            username: customAiProfileData.name,
-                            avatarURL: customAiProfileData.avatar,
-                        });
+        try {
+            webhooks.forEach((webhook) => {
+                if (
+                    webhook.name === configJSON.webhookName &&
+                    webhook.owner?.id === client.user?.id
+                ) {
+                    webhook.send({
+                        content,
+                        username: customAiProfileData.name,
+                        avatarURL: customAiProfileData.avatar,
+                    });
+                    messageSent = true;
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            await otherUtils.sendMessage(
+                client,
+                channelCache.id,
+                "Please try again later."
+            );
+        }
 
-                        messageSent = true;
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Please try again later."
-                );
-            }
-
-            if (!messageSent) {
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Webhook is not found. Please add one in this channel."
-                );
-            }
+        if (!messageSent) {
+            otherUtils.sendMessage(
+                client,
+                channelCache.id,
+                "Webhook not found. Please add one to this channel."
+            );
         }
     },
+    // Works with "impersonate" command.
     sendSimpleWebhook: async ({
         client,
         channelId,
         content,
         webhookName,
         webhookImg,
-    }: sendWebhookArgs) => {
+    }: SendSimpleWebhookArgs) => {
         const channel = otherUtils.getChannelCache(client, channelId);
 
-        if (channel instanceof TextChannel) {
-            if (!webhookUtils.isValidHttpUrl(webhookImg)) {
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Image URL is not valid."
-                );
-                return;
-            }
+        if (!channel) return;
 
-            const webhooks = await channel.fetchWebhooks();
-            if (!configJSON || !configJSON.webhookName) return;
+        if (!webhookUtils.isValidHttpUrl(webhookImg)) {
+            return await otherUtils.sendMessage(
+                client,
+                channel.id,
+                "Image URL is not valid."
+            );
+        }
+        if (!(channel instanceof TextChannel)) return;
 
-            let messageSent = false;
-            try {
-                webhooks.forEach(async (webhook) => {
-                    if (webhook.name === configJSON.webhookName) {
-                        webhook.send({
-                            content,
-                            username: webhookName,
-                            avatarURL: webhookImg,
-                        });
+        const webhooks = await channel.fetchWebhooks();
 
-                        messageSent = true;
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Please try again later."
-                );
-            }
+        if (!configJSON || !configJSON.webhookName) {
+            return await otherUtils.sendMessage(
+                client,
+                channel.id,
+                "Config file is not found or not valid."
+            );
+        }
 
-            if (!messageSent) {
-                otherUtils.sendMessage(
-                    client,
-                    channel.id,
-                    "Webhook is not found. Please add one to this channel."
-                );
-            }
+        let messageSent = false;
+        try {
+            webhooks.forEach(async (webhook) => {
+                if (webhook.name === configJSON.webhookName) {
+                    webhook.send({
+                        content,
+                        username: webhookName,
+                        avatarURL: webhookImg,
+                    });
+
+                    messageSent = true;
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            otherUtils.sendMessage(
+                client,
+                channel.id,
+                "Please try again later."
+            );
+        }
+
+        if (!messageSent) {
+            otherUtils.sendMessage(
+                client,
+                channel.id,
+                "Webhook not found. Please add one to this channel."
+            );
         }
     },
 };
