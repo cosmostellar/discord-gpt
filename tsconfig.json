@@ -1,6 +1,8 @@
 {
     "include": ["src/**/*"],
     "compilerOptions": {
+        "typeRoots": ["/src/types/process-env.d.ts", "src/types/discord.d.ts"],
+        "rootDir": "src",
         "outDir": "build",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
