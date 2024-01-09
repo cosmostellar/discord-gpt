@@ -30,7 +30,7 @@ const command: CommandFile = {
         // It shouldn't work in DMs.
         if (interaction.channel?.type === ChannelType.DM) {
             return await interaction.reply({
-                content: "You cannot use this command in DM message! 🚫",
+                content: "You cannot use this command in a DM! 🚫",
             });
         }
         if (!interaction.guildId) return;
@@ -43,6 +43,7 @@ const command: CommandFile = {
         if (!configJSON.webhookName) {
             return await interaction.reply({
                 content: "Webhook name cannot be empty. 🚫",
+                ephemeral: true,
             });
         }
 
@@ -89,9 +90,10 @@ const command: CommandFile = {
                         }
                     }
 
-                    return await interaction.reply(
-                        "Webhook successfully added."
-                    );
+                    return await interaction.reply({
+                        content: "Webhook successfully added.",
+                        ephemeral: true,
+                    });
                 }
                 break;
 
@@ -115,13 +117,15 @@ const command: CommandFile = {
                     });
 
                     if (isSuccessful) {
-                        return await interaction.reply(
-                            "Webhook successfully removed."
-                        );
+                        return await interaction.reply({
+                            content: "Webhook successfully removed.",
+                            ephemeral: true,
+                        });
                     } else {
-                        return await interaction.reply(
-                            "There is no webhook to remove."
-                        );
+                        return await interaction.reply({
+                            content: "There is no webhook to remove.",
+                            ephemeral: true,
+                        });
                     }
                 }
                 break;
