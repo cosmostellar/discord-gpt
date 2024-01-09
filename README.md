@@ -47,12 +47,14 @@ Check the ping.
 ## `package.json` Scripts
 | name                    | description                                                                                                                   |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `ts:watch`              | Watch the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
 | `start`                 | Start the code in the `build` directory.                                                                                      |
-| `watch`                 | Watch changes in the `build` folder and reruns the process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
 | `build`                 | Build the code in the `src` directory.                                                                                        |
+| `watch`                 | Watch changes in the `build` folder and reruns the process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
+| `watch:nodemon`         | Watch changes in the `build` folder and reruns the process when it detects a change.                                          |
+| `ts:watch`              | Watch the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
 | `discord:deploy`        | Deploy slash commands for the specified server in the `.env` file.                                                            |
 | `discord:deploy-global` | Deploy global slash commands.                                                                                                 |
+| `lint`                  | Check ESLint warnings and errors.                                                                                             |
 
 
 ## Required Bot Permissions
