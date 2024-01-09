@@ -62,9 +62,10 @@ const registerCommands = () => {
             await command.execute(interaction);
         } catch (error) {
             console.log(error);
-            await interaction.reply(
-                "Something went wrong! Please try again later."
-            );
+            await interaction.reply({
+                content: "Something went wrong! Please try again later.",
+                ephemeral: true,
+            });
         }
     });
 };
