@@ -45,14 +45,12 @@ const event: EventFile = {
                 ? await prismaUtils.prefix.findMany(message.guildId)
                 : null;
 
-            if (!prefixData && message.content.startsWith("!")) {
-                return;
-            } else if (prefixData) {
-                prefixData.forEach((prefix) => {
-                    if (message.content.startsWith(prefix.name)) {
-                        return;
-                    }
-                });
+            if (!prefixData) return;
+
+            for (const prefix of prefixData) {
+                if (message.content.startsWith(prefix.name)) {
+                    return;
+                }
             }
         }
 
