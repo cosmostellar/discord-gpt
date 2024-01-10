@@ -54,7 +54,7 @@ const event: EventFile = {
             }
         }
 
-        const isAvailableChannel = await checkAvailability(message, isDM);
+        const isAvailableChannel = await checkGptChannel(message, isDM);
         if (isAvailableChannel === false) {
             return;
         }
@@ -79,7 +79,7 @@ const event: EventFile = {
 
         // Traverse messages and only keep required ones.
         prevMessages.reverse();
-        let chatLog = await getChatLog(message, prevMessages, isDM);
+        let chatLog = await getChatHistory(message, prevMessages, isDM);
 
         // If the user has their own fixed prompts, include it.
         const fixedPromptData = message.guildId
@@ -175,7 +175,7 @@ const event: EventFile = {
 
         // Send Reply. If the answer's too long. Separate them into multiple messages.
         if (reply.content.length >= 1999) {
-            const answerList = getAnswerList(reply);
+            const answerList = splitLongAnswer(reply);
 
             try {
                 answerList.forEach(async (answer) => {
@@ -279,42 +279,43 @@ const replyMessage = async (
     }
 };
 
-const checkAvailability = async (message: Message, isDM: boolean) => {
+/** Check if a message is from a GPT channel (or DM channel). */
+const checkGptChannel = async (message: Message, isDM: boolean) => {
+    if (isDM) return true;
+
+    // * The message is not from a DM channel starting from here.
+
+    // Answer the message if the bot was mentioned.
+    // The bot still answers even when the channel is not a GPT channel.
+    for (const item of message.mentions.users) {
+        if (item[0] === message.client.user?.id) {
+            return true;
+        }
+    }
+
     const channelData = message.guildId
         ? await prismaUtils.channel.findFirst(
               message.channelId,
               message.guildId
           )
         : null;
+    if (!channelData) return false;
+    if (channelData.isGptChannel && channelData.id === message.channelId)
+        return true;
 
-    // Check if the channel is a GPT channel
-    // or if the message has a mention to the bot.
-    let isAvailableChannel = false;
-    if (
-        (channelData?.isGptChannel && message.channelId === channelData.id) ||
-        isDM
-    ) {
-        isAvailableChannel = true;
-    } else if (!channelData?.isGptChannel && !isDM) {
-        isAvailableChannel = false;
-    }
-    message.mentions.users.forEach((one) => {
-        if (one.id === message.client.user?.id) {
-            isAvailableChannel = true;
-        }
-    });
-    // Answer the message if the bot was mentioned.
-    // It still replies even when the channel is not a GPT channel.
-    message.mentions.users.forEach((one) => {
-        if (one.id === message.client.user?.id) {
-            isAvailableChannel = true;
-        }
-    });
-
-    return isAvailableChannel;
+    return false;
 };
 
-const getChatLog = async (
+/**
+ * Get the chat history from a channel.
+ *
+ * It doesn't include following messages:
+ * - Messages from other users.
+ * - Messages from other bots.
+ * - Messages without a reference being replied to.
+ * - Messages that start with a prefix.
+ */
+const getChatHistory = async (
     message: Message,
     prevMessages: [string, Message<true>][],
     isDM: boolean
@@ -323,17 +324,34 @@ const getChatLog = async (
         role: string;
         content: string;
     }
-    // Read the latest messages and push required ones in an array named 'chatLog'.
+
     const chatLog: ChatLog[] = [];
 
     for (let i = 0; i < prevMessages.length; i++) {
         const readingMessage: Message = prevMessages[i][1];
 
+        // Ignore message triggers from other users.
+        if (
+            !readingMessage.author.bot &&
+            readingMessage.author.id !== message.author.id
+        ) {
+            continue;
+        }
+
+        // Ignore message triggers from other bots.
+        if (
+            readingMessage.author.bot &&
+            readingMessage.author.id !== message.client.user.id &&
+            !readingMessage.webhookId
+        )
+            continue;
+
+        // Include bot replies.
         if (
             readingMessage.author.id === message.client.user?.id &&
             !readingMessage.webhookId
         ) {
-            // If the message was created by the chatbot.
+            // Ignore message triggers without a reference being replied to.
             if (!readingMessage.reference?.messageId) {
                 continue;
             }
@@ -350,75 +368,61 @@ const getChatLog = async (
                 role: "assistant",
                 content: readingMessage.content,
             });
-        } else {
-            if (readingMessage.webhookId && message.guildId) {
-                // If the message was created with Webhooks.
+            continue;
+        }
 
-                const customAiProfileData =
-                    await prismaUtils.customAiProfile.findFirst(
-                        message.author.id,
-                        message.guildId ?? undefined
-                    );
+        // Include bot webhook replies.
+        if (message.guildId && readingMessage.webhookId) {
+            const customAiProfileData =
+                await prismaUtils.customAiProfile.findFirst(
+                    message.author.id,
+                    message.guildId ?? undefined
+                );
 
-                if (!customAiProfileData) {
-                    continue;
-                }
+            if (!customAiProfileData) continue;
 
-                if (
-                    readingMessage.guildId === customAiProfileData.guildId &&
-                    readingMessage.author.username === customAiProfileData.name
-                ) {
-                    chatLog.push({
-                        role: "assistant",
-                        content: readingMessage.content,
-                    });
-                }
-            } else {
-                // Continue if the message was created by a user.
-                if (isDM) {
-                    if (readingMessage.content.startsWith("!")) {
-                        continue;
-                    }
-                } else if (!isDM && message.guildId) {
-                    const prefixData = message.guildId
-                        ? await prismaUtils.prefix.findMany(message.guildId)
-                        : null;
-
-                    if (message.content.startsWith("!")) {
-                        continue;
-                    }
-
-                    if (prefixData) {
-                        for (
-                            let index = 0;
-                            index < prefixData.length;
-                            index++
-                        ) {
-                            if (
-                                readingMessage.content.startsWith(
-                                    prefixData[index].name
-                                )
-                            ) {
-                                continue;
-                            }
-                        }
-                    }
-                }
-                if (
-                    readingMessage.author.id !== message.client.user.id &&
-                    message.author.bot
-                ) {
-                    continue;
-                }
-                if (readingMessage.author.id !== message.author.id) {
-                    continue;
-                }
-
+            if (
+                readingMessage.guildId === customAiProfileData.guildId &&
+                readingMessage.author.username === customAiProfileData.name
+            ) {
                 chatLog.push({
-                    role: "user",
+                    role: "assistant",
                     content: readingMessage.content,
                 });
+
+                continue;
             }
+        }
+
+        // Exclude messages starting with a prefix.
+        if (isDM) {
+            if (readingMessage.content.startsWith("!")) {
+                continue;
+            }
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
+        } else if (message.guildId) {
+            const prefixData = message.guildId
+                ? await prismaUtils.prefix.findMany(message.guildId)
+                : null;
+
+            if (message.content.startsWith("!")) {
+                continue;
+            }
+
+            if (!prefixData) continue;
+            for (let index = 0; index < prefixData.length; index++) {
+                if (readingMessage.content.startsWith(prefixData[index].name)) {
+                    continue;
+                }
+            }
+
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
         }
     }
 
@@ -430,7 +434,8 @@ interface Reply {
     content: string;
 }
 
-const getAnswerList = (reply: Reply) => {
+/** Split a long answer into smaller messages. */
+const splitLongAnswer = (reply: Reply) => {
     const answerList: string[] = [];
     let lastIndex = 0;
 
