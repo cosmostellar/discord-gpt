@@ -1,11 +1,11 @@
-import client from "./getPrismaClient";
+import prisma from "./getPrismaClient";
 
 const guild = {
     create: async (guildId: string) => {
         const existingGuild = await guild.findFirst(guildId);
 
         if (!existingGuild) {
-            const createdGuild = await client?.guild.create({
+            const createdGuild = await prisma?.guild.create({
                 data: {
                     id: guildId,
                     ignoringPrefix: {
@@ -23,7 +23,7 @@ const guild = {
     },
     findFirst: async (guildId: string) => {
         return (
-            (await client?.guild.findFirst({
+            (await prisma?.guild.findFirst({
                 where: {
                     id: guildId,
                 },
@@ -35,7 +35,7 @@ const guild = {
 
         if (existingGuild) {
             return (
-                (await client.guild.delete({
+                (await prisma.guild.delete({
                     where: {
                         id: existingGuild.id,
                     },
@@ -58,14 +58,14 @@ const channel = {
 
         let existingChannel;
         if (existingGuild && guildId) {
-            existingChannel = await client.channel.findFirst({
+            existingChannel = await prisma.channel.findFirst({
                 where: {
                     id: channelId,
                     guildId,
                 },
             });
         } else {
-            existingChannel = await client.channel.findFirst({
+            existingChannel = await prisma.channel.findFirst({
                 where: {
                     id: channelId,
                 },
@@ -84,7 +84,7 @@ const channel = {
 
             if (existingGuild && !existingChannel) {
                 return (
-                    (await client?.channel.create({
+                    (await prisma?.channel.create({
                         data: {
                             id: channelId,
                             isGptChannel: false,
@@ -102,7 +102,7 @@ const channel = {
 
             if (!existingChannel) {
                 return (
-                    (await client?.channel.create({
+                    (await prisma?.channel.create({
                         data: {
                             id: channelId,
                             isGptChannel: false,
@@ -128,7 +128,7 @@ const channel = {
 
         if (existingChannel) {
             return (
-                (await client?.channel.update({
+                (await prisma?.channel.update({
                     where: {
                         id: channelId,
                     },
@@ -146,7 +146,7 @@ const channel = {
 
         if (existingChannel) {
             return (
-                (await client.channel.delete({
+                (await prisma.channel.delete({
                     where: {
                         id: existingChannel.id,
                     },
@@ -167,7 +167,7 @@ const fixedPrompt = {
 
         if (existingChannel) {
             return (
-                (await client?.fixedPrompt.findFirst({
+                (await prisma?.fixedPrompt.findFirst({
                     where: {
                         userId: userId,
                         channelId: channelId,
@@ -211,7 +211,7 @@ const fixedPrompt = {
 
         if (existingUser && existingChannel) {
             return (
-                (await client?.fixedPrompt.create({
+                (await prisma?.fixedPrompt.create({
                     data: {
                         prompt: args.prompt,
                         isTemplate: args.isTemplate,
@@ -243,7 +243,7 @@ const fixedPrompt = {
         );
 
         if (existingChannel) {
-            const changedFixedPrompt = await client.fixedPrompt.update({
+            const changedFixedPrompt = await prisma.fixedPrompt.update({
                 where: {
                     id,
                 },
@@ -265,7 +265,7 @@ const fixedPrompt = {
         );
 
         if (existingChannel) {
-            const deletedFixedPrompt = await client.fixedPrompt.delete({
+            const deletedFixedPrompt = await prisma.fixedPrompt.delete({
                 where: {
                     id,
                 },
@@ -283,7 +283,7 @@ const fixedPrompt = {
         );
 
         if (existingChannel) {
-            const deletedFixedPrompt = await client.fixedPrompt.deleteMany({
+            const deletedFixedPrompt = await prisma.fixedPrompt.deleteMany({
                 where: {
                     channelId,
                     userId,
@@ -313,7 +313,7 @@ const fixedPromptTemplate = {
 
         if (existingChannel) {
             return (
-                (await client.fixedPromptTemplate.create({
+                (await prisma.fixedPromptTemplate.create({
                     data: {
                         guild: {
                             connect: {
@@ -337,7 +337,7 @@ const fixedPromptTemplate = {
 
         if (existingChannel) {
             return (
-                (await client.fixedPromptTemplate.findMany({
+                (await prisma.fixedPromptTemplate.findMany({
                     where: {
                         guildId,
                     },
@@ -365,7 +365,7 @@ const fixedPromptTemplate = {
 
         if (existingChannel) {
             const deletedFixedPromptTemplate =
-                await client.fixedPromptTemplate.delete({
+                await prisma.fixedPromptTemplate.delete({
                     where: {
                         id,
                     },
@@ -380,7 +380,7 @@ const fixedPromptTemplate = {
 
 const user = {
     findFirst: async (userId: string) => {
-        return await client?.user.findFirst({
+        return await prisma?.user.findFirst({
             where: {
                 id: userId,
             },
@@ -390,7 +390,7 @@ const user = {
         const existingUser = await user.findFirst(userId);
 
         if (!existingUser) {
-            const createdUser = await client?.user.create({
+            const createdUser = await prisma?.user.create({
                 data: {
                     id: userId,
                 },
@@ -409,7 +409,7 @@ const prefix = {
 
         if (existingGuild) {
             return (
-                (await client?.ignoringPrefix.findMany({
+                (await prisma?.ignoringPrefix.findMany({
                     where: {
                         guildId,
                     },
@@ -429,7 +429,7 @@ const prefix = {
 
         if (existingGuild) {
             return (
-                (await client?.ignoringPrefix.create({
+                (await prisma?.ignoringPrefix.create({
                     data: {
                         name: args.prefixName,
                         guild: {
@@ -450,7 +450,7 @@ const prefix = {
 
         if (existingGuild) {
             const deletedIgnoringPrefix =
-                (await client.ignoringPrefix.deleteMany({
+                (await prisma.ignoringPrefix.deleteMany({
                     where: {
                         guildId,
                         name: arg.prefixName,
@@ -474,7 +474,7 @@ const customAiProfile = {
 
         if (existingGuild && existingUser) {
             return (
-                (await client?.customAiProfile.findFirst({
+                (await prisma?.customAiProfile.findFirst({
                     where: {
                         guildId,
                         userId,
@@ -503,7 +503,7 @@ const customAiProfile = {
 
         if (!existingCustomAiProfile && existingUser) {
             return (
-                (await client?.customAiProfile.create({
+                (await prisma?.customAiProfile.create({
                     data: {
                         guildId,
                         userId,
@@ -527,7 +527,7 @@ const customAiProfile = {
 
         if (existingGuild) {
             const changedPredefinedPrompt =
-                (await client.customAiProfile.update({
+                (await prisma.customAiProfile.update({
                     where: {
                         id,
                     },
@@ -548,7 +548,7 @@ const customAiProfile = {
 
         if (existingGuild) {
             const deletedWebhookCustom =
-                (await client.customAiProfile.deleteMany({
+                (await prisma.customAiProfile.deleteMany({
                     where: {
                         guildId,
                         userId,
