@@ -1,6 +1,7 @@
 import {
     ChannelType,
     DiscordAPIError,
+    DMChannel,
     Events,
     GuildChannel,
     Message,
@@ -62,7 +63,13 @@ const event: EventFile = {
         // Show typing status.
         isTyping = true;
         const textChannel = message.channel;
-        if (!(textChannel instanceof TextChannel)) return;
+        if (
+            !(
+                textChannel instanceof TextChannel ||
+                textChannel instanceof DMChannel
+            )
+        )
+            return;
         executeAsync(keepTyping, textChannel);
 
         // Get previous messages.
@@ -79,7 +86,11 @@ const event: EventFile = {
 
         // Traverse messages and only keep required ones.
         prevMessages.reverse();
-        let chatLog = await getChatHistory(message, prevMessages, isDM);
+        let chatLog = await getChatHistory(
+            message,
+            prevMessages as [string, Message<true>][],
+            isDM
+        );
 
         // If the user has their own fixed prompts, include it.
         const fixedPromptData = message.guildId
@@ -200,8 +211,11 @@ const event: EventFile = {
     },
 };
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
-const executeAsync = (func: (...args: any[]) => any, channel: TextChannel) => {
+const executeAsync = (
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
+    func: (...args: any[]) => any,
+    channel: TextChannel | DMChannel
+) => {
     setTimeout(func, 0, channel);
 };
 
