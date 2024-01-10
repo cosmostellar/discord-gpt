@@ -16,6 +16,14 @@ import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 import { asyncUtils, webhookUtils } from "../utils/utilFunctions";
 
+let isTyping = false;
+const keepTyping = async (channel: TextChannel | DMChannel) => {
+    while (isTyping) {
+        channel.sendTyping();
+        await asyncUtils.delay(5000);
+    }
+};
+
 const event: EventFile = {
     name: Events.MessageCreate,
     once: false,
@@ -70,7 +78,7 @@ const event: EventFile = {
             )
         )
             return;
-        executeAsync(keepTyping, textChannel);
+        keepTyping(textChannel);
 
         // Get previous messages.
         if (!configJSON || !configJSON.aiInputLimit) return;
@@ -211,22 +219,7 @@ const event: EventFile = {
     },
 };
 
-const executeAsync = (
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
-    func: (...args: any[]) => any,
-    channel: TextChannel | DMChannel
-) => {
-    setTimeout(func, 0, channel);
-};
-
-let isTyping = false;
-const keepTyping = async (channel: TextChannel) => {
-    while (isTyping) {
-        channel.sendTyping();
-        await asyncUtils.delay(5000);
-    }
-};
-
+/** Reply to a message. When it detects specific user settings, use a webhook. */
 const replyMessage = async (
     discordMessage: Message<boolean>,
     inputMessage: string
