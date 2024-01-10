@@ -25,6 +25,7 @@ interface SendSimpleWebhookArgs {
 }
 
 export const webhookUtils = {
+    /** Check a string is a valid URL. */
     isValidHttpUrl: (string: string) => {
         let url;
 
@@ -36,7 +37,7 @@ export const webhookUtils = {
 
         return url.protocol === "http:" || url.protocol === "https:";
     },
-    // Works with "customAiProfile" command.
+    /** Detects user settings and sends a webhook message. */
     sendWebhookMessage: async ({
         client,
         guildId,
@@ -104,7 +105,7 @@ export const webhookUtils = {
             );
         }
     },
-    // Works with "impersonate" command.
+    /** Send a webhook but with a custom name and avatar. */
     sendSimpleWebhook: async ({
         client,
         channelId,

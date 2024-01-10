@@ -24,6 +24,7 @@ const client = new Client({
     partials: [Partials.Channel],
 });
 
+/** Register slash commands in the "./commands" directory. */
 const registerCommands = () => {
     const commandsPath = path.join(__dirname, "commands");
     client.commands = new Collection();
@@ -71,6 +72,7 @@ const registerCommands = () => {
 };
 registerCommands();
 
+/** Register slash commands in the "./events" directory. */
 const registerEvents = () => {
     const eventsPath = path.join(__dirname, "events");
     fs.readdirSync(eventsPath);
