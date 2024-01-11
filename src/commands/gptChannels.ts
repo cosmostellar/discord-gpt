@@ -39,77 +39,62 @@ const command: CommandFile = {
         const subCommand = (
             interaction.options as CommandInteractionOptionResolver
         ).getSubcommand();
-        let isAddingChannel: boolean;
+
+        await interaction.deferReply({ ephemeral: true });
+
+        let existingChannel = await prismaUtils.channel.findFirst(
+            interaction.channelId,
+            interaction.guildId
+        );
+        if (!existingChannel) {
+            existingChannel = await prismaUtils.channel.create(
+                interaction.channelId,
+                interaction.guildId
+            );
+        }
+
+        // Because this command only works in a guild, guild ID always exists.
+        if (!existingChannel) return;
+        if (!existingChannel.guildId) return;
+
+        let isAddingGptChannel: boolean | null = null;
 
         if (subCommand === "add") {
-            isAddingChannel = true;
+            isAddingGptChannel = true;
+        } else if (subCommand === "remove") {
+            isAddingGptChannel = false;
         } else {
-            isAddingChannel = false;
-        }
-
-        if (isAddingChannel !== null) {
-            await interaction.deferReply({ ephemeral: true });
-
-            let isSuccessful = false;
-
-            const existingChannel = await prismaUtils.channel.findFirst(
-                interaction.channelId,
-                interaction.guildId
-            );
-
-            if (!existingChannel) {
-                const createdChannel = await prismaUtils.channel.create(
-                    interaction.channelId,
-                    interaction.guildId
-                );
-
-                if (createdChannel && createdChannel.guildId) {
-                    await prismaUtils.channel.updateGptChannel(
-                        createdChannel.id,
-                        {
-                            isGptChannel: true,
-                        },
-                        createdChannel.guildId
-                    );
-                }
-
-                if (createdChannel) {
-                    isSuccessful = true;
-                }
-            }
-
-            const updatedChannel = await prismaUtils.channel.updateGptChannel(
-                interaction.channelId,
-                {
-                    isGptChannel: isAddingChannel,
-                },
-                interaction.guildId
-            );
-
-            if (!updatedChannel) {
-                return await interaction.editReply({
-                    content: "Please try again later. 😢",
-                });
-            }
-
-            isSuccessful = true;
-
-            if (!isSuccessful) {
-                return await interaction.editReply({
-                    content: "Please try again later. 😢",
-                });
-            }
-
-            if (!isAddingChannel) {
-                return await interaction.editReply({
-                    content: "This channel is no longer a GPT channel! 🤖",
-                });
-            }
-
             return await interaction.editReply({
-                content: "This channel is now a GPT channel! 🤖",
+                content: "Please try again later. 😢",
             });
         }
+
+        const updatedGptChannel = await prismaUtils.channel.updateGptChannel(
+            existingChannel.id,
+            {
+                isGptChannel: isAddingGptChannel,
+            },
+            existingChannel.guildId
+        );
+
+        if (updatedGptChannel) {
+            switch (subCommand) {
+                case "add":
+                    return await interaction.editReply({
+                        content: "This channel is now a GPT channel! 🤖",
+                    });
+                    break;
+                case "remove":
+                    return await interaction.editReply({
+                        content: "This channel is no longer a GPT channel! 🤖",
+                    });
+                    break;
+            }
+        }
+
+        return await interaction.editReply({
+            content: "Please try again later. 😢",
+        });
     },
 };
 
