@@ -55,12 +55,24 @@ const command: CommandFile = {
             interaction.options as CommandInteractionOptionResolver
         ).getSubcommand();
 
+        const prefixArr = await prismaUtils.prefix.findMany(
+            interaction.guildId
+        );
+        const prefixStringArr = prefixArr?.map((item) => item.name);
+
         switch (subCommand) {
             case "add":
                 {
                     await interaction.deferReply({ ephemeral: true });
-                    const targetPrefix =
-                        interaction.options.get("prefix")?.value;
+                    const targetPrefix = interaction.options.get("prefix")
+                        ?.value as string;
+
+                    if (prefixStringArr?.includes(targetPrefix)) {
+                        return await interaction.editReply({
+                            content:
+                                "The prefix is already added in this server. 😢",
+                        });
+                    }
 
                     const createdPrefix = await prismaUtils.prefix.create(
                         {
@@ -76,7 +88,42 @@ const command: CommandFile = {
                     }
 
                     return await interaction.editReply({
-                        content: "Ignoring prefix is successfully added! ✅",
+                        content: "the prefix is successfully added! ✅",
+                    });
+                }
+                break;
+            case "remove":
+                {
+                    await interaction.deferReply({ ephemeral: true });
+                    const targetPrefix = interaction.options.get("prefix")
+                        ?.value as string;
+
+                    if (targetPrefix === ".") {
+                        return await interaction.editReply({
+                            content: "You cannot remove the default prefix. 🚫",
+                        });
+                    }
+
+                    if (!prefixStringArr?.includes(targetPrefix)) {
+                        return await interaction.editReply({
+                            content:
+                                "The prefix is not found in your server. 😢",
+                        });
+                    }
+
+                    const deletedPrefix = prismaUtils.prefix.deleteMany(
+                        { prefixName: targetPrefix },
+                        interaction.guildId
+                    );
+
+                    if (!deletedPrefix) {
+                        return await interaction.editReply({
+                            content: "Please try again later. 😢",
+                        });
+                    }
+
+                    return await interaction.editReply({
+                        content: "The prefix is successfully removed! ✅",
                     });
                 }
                 break;
@@ -84,30 +131,23 @@ const command: CommandFile = {
             case "view":
                 {
                     await interaction.deferReply({ ephemeral: true });
-                    const prefixArr = await prismaUtils.prefix.findMany(
-                        interaction.guildId
-                    );
+
+                    if (!prefixArr) {
+                        return await interaction.editReply(
+                            "The prefix is not found in your server. 😢"
+                        );
+                    }
 
                     let list = "";
-                    if (prefixArr) {
-                        prefixArr.forEach((item, index) => {
-                            if (index === prefixArr.length - 1) {
-                                list += `${item.name}`;
-                            } else {
-                                list += `${item.name} / `;
-                            }
-                        });
+                    prefixArr.forEach((item, index) => {
+                        if (index === prefixArr.length - 1) {
+                            list += `${item.name}`;
+                        } else {
+                            list += `${item.name} / `;
+                        }
+                    });
 
-                        return await interaction.editReply({ content: list });
-                    } else if (!prefixArr) {
-                        return await interaction.editReply(
-                            "Ignoring Prefix was not found in your server! 😢"
-                        );
-                    } else {
-                        return await interaction.editReply({
-                            content: "Please try again later. 😢",
-                        });
-                    }
+                    return await interaction.editReply({ content: list });
                 }
                 break;
 
