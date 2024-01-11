@@ -4,26 +4,31 @@ const guild = {
     create: async (guildId: string) => {
         const existingGuild = await guild.findFirst(guildId);
 
-        if (!existingGuild) {
-            const createdGuild = await prisma?.guild.create({
-                data: {
-                    id: guildId,
-                    ignoringPrefix: {
-                        create: {
-                            name: "!",
-                        },
-                    },
-                },
-            });
-
-            return createdGuild;
+        if (existingGuild) {
+            return null;
         }
 
-        return null;
+        try {
+            const createdGuild =
+                (await prisma.guild.create({
+                    data: {
+                        id: guildId,
+                        ignoringPrefix: {
+                            create: {
+                                name: ".",
+                            },
+                        },
+                    },
+                })) ?? null;
+
+            return createdGuild;
+        } catch (error) {
+            return null;
+        }
     },
     findFirst: async (guildId: string) => {
         return (
-            (await prisma?.guild.findFirst({
+            (await prisma.guild.findFirst({
                 where: {
                     id: guildId,
                 },
@@ -33,17 +38,17 @@ const guild = {
     delete: async (guildId: string) => {
         const existingGuild = await guild.findFirst(guildId);
 
-        if (existingGuild) {
-            return (
-                (await prisma.guild.delete({
-                    where: {
-                        id: existingGuild.id,
-                    },
-                })) ?? null
-            );
-        } else {
+        if (!existingGuild) {
             return null;
         }
+
+        return (
+            (await prisma.guild.delete({
+                where: {
+                    id: existingGuild.id,
+                },
+            })) ?? null
+        );
     },
 };
 
@@ -84,7 +89,7 @@ const channel = {
 
             if (existingGuild && !existingChannel) {
                 return (
-                    (await prisma?.channel.create({
+                    (await prisma.channel.create({
                         data: {
                             id: channelId,
                             isGptChannel: false,
@@ -102,7 +107,7 @@ const channel = {
 
             if (!existingChannel) {
                 return (
-                    (await prisma?.channel.create({
+                    (await prisma.channel.create({
                         data: {
                             id: channelId,
                             isGptChannel: false,
@@ -128,7 +133,7 @@ const channel = {
 
         if (existingChannel) {
             return (
-                (await prisma?.channel.update({
+                (await prisma.channel.update({
                     where: {
                         id: channelId,
                     },
@@ -167,7 +172,7 @@ const fixedPrompt = {
 
         if (existingChannel) {
             return (
-                (await prisma?.fixedPrompt.findFirst({
+                (await prisma.fixedPrompt.findFirst({
                     where: {
                         userId: userId,
                         channelId: channelId,
@@ -206,12 +211,12 @@ const fixedPrompt = {
 
         const existingChannel = await getExisting.getExistingChannel(
             channelId,
-            guildId ?? undefined
+            guildId
         );
 
         if (existingUser && existingChannel) {
             return (
-                (await prisma?.fixedPrompt.create({
+                (await prisma.fixedPrompt.create({
                     data: {
                         prompt: args.prompt,
                         isTemplate: args.isTemplate,
@@ -380,7 +385,7 @@ const fixedPromptTemplate = {
 
 const user = {
     findFirst: async (userId: string) => {
-        return await prisma?.user.findFirst({
+        return await prisma.user.findFirst({
             where: {
                 id: userId,
             },
@@ -390,7 +395,7 @@ const user = {
         const existingUser = await user.findFirst(userId);
 
         if (!existingUser) {
-            const createdUser = await prisma?.user.create({
+            const createdUser = await prisma.user.create({
                 data: {
                     id: userId,
                 },
@@ -407,17 +412,17 @@ const prefix = {
         const existingGuild =
             (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
 
-        if (existingGuild) {
-            return (
-                (await prisma?.ignoringPrefix.findMany({
-                    where: {
-                        guildId,
-                    },
-                })) ?? null
-            );
-        } else {
+        if (!existingGuild) {
             return null;
         }
+
+        return (
+            (await prisma.ignoringPrefix.findMany({
+                where: {
+                    guildId,
+                },
+            })) ?? null
+        );
     },
     create: async (
         args: {
@@ -427,40 +432,40 @@ const prefix = {
     ) => {
         const existingGuild = await guild.findFirst(guildId);
 
-        if (existingGuild) {
-            return (
-                (await prisma?.ignoringPrefix.create({
-                    data: {
-                        name: args.prefixName,
-                        guild: {
-                            connect: {
-                                id: guildId,
-                            },
-                        },
-                    },
-                })) ?? null
-            );
-        } else {
+        if (!existingGuild) {
             return null;
         }
+
+        return (
+            (await prisma.ignoringPrefix.create({
+                data: {
+                    name: args.prefixName,
+                    guild: {
+                        connect: {
+                            id: guildId,
+                        },
+                    },
+                },
+            })) ?? null
+        );
     },
     deleteMany: async (arg: { prefixName: string }, guildId: string) => {
         const existingGuild =
             (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
 
-        if (existingGuild) {
-            const deletedIgnoringPrefix =
-                (await prisma.ignoringPrefix.deleteMany({
-                    where: {
-                        guildId,
-                        name: arg.prefixName,
-                    },
-                })) ?? null;
-
-            return deletedIgnoringPrefix.count > 0;
-        } else {
+        if (!existingGuild) {
             return false;
         }
+
+        const deletedIgnoringPrefix =
+            (await prisma.ignoringPrefix.deleteMany({
+                where: {
+                    guildId,
+                    name: arg.prefixName,
+                },
+            })) ?? null;
+
+        return deletedIgnoringPrefix.count > 0;
     },
 };
 
@@ -472,18 +477,18 @@ const customAiProfile = {
         const existingUser =
             (await user.findFirst(userId)) ?? (await user.create(userId));
 
-        if (existingGuild && existingUser) {
-            return (
-                (await prisma?.customAiProfile.findFirst({
-                    where: {
-                        guildId,
-                        userId,
-                    },
-                })) ?? null
-            );
-        } else {
+        if (!existingGuild || !existingUser) {
             return null;
         }
+
+        return (
+            (await prisma.customAiProfile.findFirst({
+                where: {
+                    guildId,
+                    userId,
+                },
+            })) ?? null
+        );
     },
     create: async (
         userId: string,
@@ -503,7 +508,7 @@ const customAiProfile = {
 
         if (!existingCustomAiProfile && existingUser) {
             return (
-                (await prisma?.customAiProfile.create({
+                (await prisma.customAiProfile.create({
                     data: {
                         guildId,
                         userId,
@@ -512,6 +517,8 @@ const customAiProfile = {
                     },
                 })) ?? null
             );
+        } else {
+            return null;
         }
     },
     update: async (
@@ -525,40 +532,40 @@ const customAiProfile = {
         const existingGuild =
             (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
 
-        if (existingGuild) {
-            const changedPredefinedPrompt =
-                (await prisma.customAiProfile.update({
-                    where: {
-                        id,
-                    },
-                    data: {
-                        name: arg.name,
-                        avatar: arg.avatar,
-                    },
-                })) ?? null;
-
-            return Boolean(changedPredefinedPrompt);
+        if (!existingGuild) {
+            return null;
         }
 
-        return null;
+        const changedPredefinedPrompt =
+            (await prisma.customAiProfile.update({
+                where: {
+                    id,
+                },
+                data: {
+                    name: arg.name,
+                    avatar: arg.avatar,
+                },
+            })) ?? null;
+
+        return Boolean(changedPredefinedPrompt);
     },
     deleteMany: async (userId: string, guildId: string) => {
         const existingGuild =
             (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
 
-        if (existingGuild) {
-            const deletedWebhookCustom =
-                (await prisma.customAiProfile.deleteMany({
-                    where: {
-                        guildId,
-                        userId,
-                    },
-                })) ?? false;
-
-            return deletedWebhookCustom && deletedWebhookCustom.count > 0;
+        if (!existingGuild) {
+            return false;
         }
 
-        return false;
+        const deletedWebhookCustom =
+            (await prisma.customAiProfile.deleteMany({
+                where: {
+                    guildId,
+                    userId,
+                },
+            })) ?? false;
+
+        return deletedWebhookCustom && deletedWebhookCustom.count > 0;
     },
 };
 

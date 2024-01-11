@@ -50,9 +50,9 @@ const event: EventFile = {
                 return;
             }
         } else if (message.guildId && !isDM) {
-            const prefixData = message.guildId
-                ? await prismaUtils.prefix.findMany(message.guildId)
-                : null;
+            const prefixData = await prismaUtils.prefix.findMany(
+                message.guildId
+            );
 
             if (!prefixData) return;
 
