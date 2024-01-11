@@ -42,13 +42,18 @@ const guild = {
             return null;
         }
 
-        return (
-            (await prisma.guild.delete({
-                where: {
-                    id: existingGuild.id,
-                },
-            })) ?? null
-        );
+        try {
+            return (
+                (await prisma.guild.delete({
+                    where: {
+                        id: existingGuild.id,
+                    },
+                })) ?? null
+            );
+        } catch (error) {
+            console.log("Failed to delete a guild from the database.");
+            return null;
+        }
     },
 };
 
@@ -88,32 +93,42 @@ const channel = {
             const existingChannel = await channel.findFirst(channelId, guildId);
 
             if (existingGuild && !existingChannel) {
-                return (
-                    (await prisma.channel.create({
-                        data: {
-                            id: channelId,
-                            isGptChannel: false,
-                            guild: {
-                                connect: {
-                                    id: guildId,
+                try {
+                    return (
+                        (await prisma.channel.create({
+                            data: {
+                                id: channelId,
+                                isGptChannel: false,
+                                guild: {
+                                    connect: {
+                                        id: guildId,
+                                    },
                                 },
                             },
-                        },
-                    })) ?? null
-                );
+                        })) ?? null
+                    );
+                } catch (error) {
+                    console.log("Failed to create a channel in the database.");
+                    return null;
+                }
             }
         } else {
             const existingChannel = await channel.findFirst(channelId);
 
             if (!existingChannel) {
-                return (
-                    (await prisma.channel.create({
-                        data: {
-                            id: channelId,
-                            isGptChannel: false,
-                        },
-                    })) ?? null
-                );
+                try {
+                    return (
+                        (await prisma.channel.create({
+                            data: {
+                                id: channelId,
+                                isGptChannel: false,
+                            },
+                        })) ?? null
+                    );
+                } catch (error) {
+                    console.log("Failed to create a channel in the database.");
+                    return null;
+                }
             }
         }
 
@@ -132,16 +147,21 @@ const channel = {
         );
 
         if (existingChannel) {
-            return (
-                (await prisma.channel.update({
-                    where: {
-                        id: channelId,
-                    },
-                    data: {
-                        isGptChannel: args.isGptChannel,
-                    },
-                })) ?? null
-            );
+            try {
+                return (
+                    (await prisma.channel.update({
+                        where: {
+                            id: channelId,
+                        },
+                        data: {
+                            isGptChannel: args.isGptChannel,
+                        },
+                    })) ?? null
+                );
+            } catch (error) {
+                console.log("Failed to update a channel in the database.");
+                return null;
+            }
         } else {
             return null;
         }
@@ -150,13 +170,18 @@ const channel = {
         const existingChannel = await getExisting.getExistingChannel(channelId);
 
         if (existingChannel) {
-            return (
-                (await prisma.channel.delete({
-                    where: {
-                        id: existingChannel.id,
-                    },
-                })) ?? null
-            );
+            try {
+                return (
+                    (await prisma.channel.delete({
+                        where: {
+                            id: existingChannel.id,
+                        },
+                    })) ?? null
+                );
+            } catch (error) {
+                console.log("Failed to delete a channel from the database.");
+                return null;
+            }
         } else {
             return null;
         }
@@ -215,20 +240,25 @@ const fixedPrompt = {
         );
 
         if (existingUser && existingChannel) {
-            return (
-                (await prisma.fixedPrompt.create({
-                    data: {
-                        prompt: args.prompt,
-                        isTemplate: args.isTemplate,
-                        user: {
-                            connect: { id: userId },
+            try {
+                return (
+                    (await prisma.fixedPrompt.create({
+                        data: {
+                            prompt: args.prompt,
+                            isTemplate: args.isTemplate,
+                            user: {
+                                connect: { id: userId },
+                            },
+                            channel: {
+                                connect: { id: channelId },
+                            },
                         },
-                        channel: {
-                            connect: { id: channelId },
-                        },
-                    },
-                })) ?? null
-            );
+                    })) ?? null
+                );
+            } catch (error) {
+                console.log("Failed to create a fixed prompt in the database.");
+                return null;
+            }
         } else {
             return null;
         }
@@ -248,17 +278,22 @@ const fixedPrompt = {
         );
 
         if (existingChannel) {
-            const changedFixedPrompt = await prisma.fixedPrompt.update({
-                where: {
-                    id,
-                },
-                data: {
-                    prompt: args.prompt,
-                    isTemplate: args.isTemplate,
-                },
-            });
+            try {
+                const changedFixedPrompt = await prisma.fixedPrompt.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        prompt: args.prompt,
+                        isTemplate: args.isTemplate,
+                    },
+                });
 
-            return Boolean(changedFixedPrompt);
+                return Boolean(changedFixedPrompt);
+            } catch (error) {
+                console.log("Failed to update a fixed prompt in the database.");
+                return false;
+            }
         } else {
             return false;
         }
@@ -270,13 +305,20 @@ const fixedPrompt = {
         );
 
         if (existingChannel) {
-            const deletedFixedPrompt = await prisma.fixedPrompt.delete({
-                where: {
-                    id,
-                },
-            });
+            try {
+                const deletedFixedPrompt = await prisma.fixedPrompt.delete({
+                    where: {
+                        id,
+                    },
+                });
 
-            return Boolean(deletedFixedPrompt);
+                return Boolean(deletedFixedPrompt);
+            } catch (error) {
+                console.log(
+                    "Failed to delete a fixed prompt from the database."
+                );
+                return false;
+            }
         } else {
             return false;
         }
@@ -317,19 +359,26 @@ const fixedPromptTemplate = {
         );
 
         if (existingChannel) {
-            return (
-                (await prisma.fixedPromptTemplate.create({
-                    data: {
-                        guild: {
-                            connect: {
-                                id: guildId,
+            try {
+                return (
+                    (await prisma.fixedPromptTemplate.create({
+                        data: {
+                            guild: {
+                                connect: {
+                                    id: guildId,
+                                },
                             },
+                            name: args.name,
+                            message: args.message,
                         },
-                        name: args.name,
-                        message: args.message,
-                    },
-                })) ?? null
-            );
+                    })) ?? null
+                );
+            } catch (error) {
+                console.log(
+                    "Failed to create a fixed prompt template in the database."
+                );
+                return null;
+            }
         } else {
             return null;
         }
@@ -369,14 +418,21 @@ const fixedPromptTemplate = {
         );
 
         if (existingChannel) {
-            const deletedFixedPromptTemplate =
-                await prisma.fixedPromptTemplate.delete({
-                    where: {
-                        id,
-                    },
-                });
+            try {
+                const deletedFixedPromptTemplate =
+                    await prisma.fixedPromptTemplate.delete({
+                        where: {
+                            id,
+                        },
+                    });
 
-            return Boolean(deletedFixedPromptTemplate);
+                return Boolean(deletedFixedPromptTemplate);
+            } catch (error) {
+                console.log(
+                    "Failed to delete a fixed prompt template from the database."
+                );
+                return false;
+            }
         } else {
             return false;
         }
@@ -395,12 +451,17 @@ const user = {
         const existingUser = await user.findFirst(userId);
 
         if (!existingUser) {
-            const createdUser = await prisma.user.create({
-                data: {
-                    id: userId,
-                },
-            });
-            return createdUser;
+            try {
+                const createdUser = await prisma.user.create({
+                    data: {
+                        id: userId,
+                    },
+                });
+                return createdUser;
+            } catch (error) {
+                console.log("Failed to create a user in the database.");
+                return null;
+            }
         }
 
         return null;
@@ -436,18 +497,23 @@ const prefix = {
             return null;
         }
 
-        return (
-            (await prisma.ignoringPrefix.create({
-                data: {
-                    name: args.prefixName,
-                    guild: {
-                        connect: {
-                            id: guildId,
+        try {
+            return (
+                (await prisma.ignoringPrefix.create({
+                    data: {
+                        name: args.prefixName,
+                        guild: {
+                            connect: {
+                                id: guildId,
+                            },
                         },
                     },
-                },
-            })) ?? null
-        );
+                })) ?? null
+            );
+        } catch (error) {
+            console.log("Failed to create an ignoring prefix in the database.");
+            return null;
+        }
     },
     deleteMany: async (arg: { prefixName: string }, guildId: string) => {
         const existingGuild =
@@ -507,16 +573,23 @@ const customAiProfile = {
         );
 
         if (!existingCustomAiProfile && existingUser) {
-            return (
-                (await prisma.customAiProfile.create({
-                    data: {
-                        guildId,
-                        userId,
-                        name: arg.name,
-                        avatar: arg.avatar,
-                    },
-                })) ?? null
-            );
+            try {
+                return (
+                    (await prisma.customAiProfile.create({
+                        data: {
+                            guildId,
+                            userId,
+                            name: arg.name,
+                            avatar: arg.avatar,
+                        },
+                    })) ?? null
+                );
+            } catch (error) {
+                console.log(
+                    "Failed to create a custom AI profile in the database."
+                );
+                return null;
+            }
         } else {
             return null;
         }
@@ -533,21 +606,28 @@ const customAiProfile = {
             (await guild.findFirst(guildId)) ?? (await guild.create(guildId));
 
         if (!existingGuild) {
-            return null;
+            return false;
         }
 
-        const changedPredefinedPrompt =
-            (await prisma.customAiProfile.update({
-                where: {
-                    id,
-                },
-                data: {
-                    name: arg.name,
-                    avatar: arg.avatar,
-                },
-            })) ?? null;
+        try {
+            const changedPredefinedPrompt =
+                (await prisma.customAiProfile.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        name: arg.name,
+                        avatar: arg.avatar,
+                    },
+                })) ?? null;
 
-        return Boolean(changedPredefinedPrompt);
+            return Boolean(changedPredefinedPrompt);
+        } catch (error) {
+            console.log(
+                "Failed to update a custom AI profile in the database."
+            );
+            return false;
+        }
     },
     deleteMany: async (userId: string, guildId: string) => {
         const existingGuild =
