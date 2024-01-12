@@ -94,7 +94,7 @@ const event: EventFile = {
 
         // Traverse messages and only keep required ones.
         prevMessages.reverse();
-        let chatLog = await getChatHistory(
+        let chatLog = await getChatLog(
             message,
             prevMessages as [string, Message<true>][],
             isDM
@@ -322,7 +322,7 @@ const checkGptChannel = async (message: Message, isDM: boolean) => {
  * - Messages without a reference being replied to.
  * - Messages that start with a prefix.
  */
-const getChatHistory = async (
+const getChatLog = async (
     message: Message,
     prevMessages: [string, Message<true>][],
     isDM: boolean
@@ -336,6 +336,38 @@ const getChatHistory = async (
 
     for (let i = 0; i < prevMessages.length; i++) {
         const readingMessage: Message = prevMessages[i][1];
+
+        // Exclude messages starting with a prefix.
+        if (isDM) {
+            if (readingMessage.content.startsWith(".")) {
+                continue;
+            }
+
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
+        } else if (message.guildId) {
+            const prefixData = await prismaUtils.prefix.findMany(
+                message.guildId
+            );
+
+            if (readingMessage.content.startsWith(".")) {
+                continue;
+            }
+
+            if (!prefixData) continue;
+            for (const prefix of prefixData) {
+                if (readingMessage.content.startsWith(prefix.name)) {
+                    continue;
+                }
+            }
+
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
+        }
 
         // Ignore message triggers from other users.
         if (
@@ -399,37 +431,6 @@ const getChatHistory = async (
 
                 continue;
             }
-        }
-
-        // Exclude messages starting with a prefix.
-        if (isDM) {
-            if (readingMessage.content.startsWith("!")) {
-                continue;
-            }
-            chatLog.push({
-                role: "user",
-                content: readingMessage.content,
-            });
-        } else if (message.guildId) {
-            const prefixData = message.guildId
-                ? await prismaUtils.prefix.findMany(message.guildId)
-                : null;
-
-            if (message.content.startsWith("!")) {
-                continue;
-            }
-
-            if (!prefixData) continue;
-            for (let index = 0; index < prefixData.length; index++) {
-                if (readingMessage.content.startsWith(prefixData[index].name)) {
-                    continue;
-                }
-            }
-
-            chatLog.push({
-                role: "user",
-                content: readingMessage.content,
-            });
         }
     }
 
