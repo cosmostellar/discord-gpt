@@ -344,7 +344,7 @@ const getChatLog = async (
         )
             continue;
 
-        // Include AI replies to the user.
+        // Read AI replies to the user.
         if (
             readingMessage.author.id === message.client.user?.id &&
             readingMessage.reference?.messageId &&
@@ -365,7 +365,7 @@ const getChatLog = async (
             continue;
         }
 
-        // Include bot webhook replies.
+        // Read bot webhook replies.
         if (message.guildId && !isDM && readingMessage.webhookId) {
             const customAiProfileData =
                 await prismaUtils.customAiProfile.findFirst(
@@ -396,12 +396,12 @@ const getChatLog = async (
         )
             continue;
 
-        // Exclude messages starting with a prefix.
+        // Read user messages.
+        if (readingMessage.webhookId || readingMessage.author.bot) continue;
         if (isDM) {
             if (readingMessage.content.startsWith(".")) {
                 continue;
             }
-
             chatLog.push({
                 role: "user",
                 content: readingMessage.content,
