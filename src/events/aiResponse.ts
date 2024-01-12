@@ -313,15 +313,7 @@ const checkGptChannel = async (message: Message, isDM: boolean) => {
     return false;
 };
 
-/**
- * Get the chat history from a channel.
- *
- * It doesn't include following messages:
- * - Messages from other users.
- * - Messages from other bots.
- * - Messages without a reference being replied to.
- * - Messages that start with a prefix.
- */
+/** Get the chat history from a channel. */
 const getChatLog = async (
     message: Message,
     prevMessages: [string, Message<true>][],
@@ -337,45 +329,12 @@ const getChatLog = async (
     for (let i = 0; i < prevMessages.length; i++) {
         const readingMessage: Message = prevMessages[i][1];
 
-        // Exclude messages starting with a prefix.
-        if (isDM) {
-            if (readingMessage.content.startsWith(".")) {
-                continue;
-            }
-
-            chatLog.push({
-                role: "user",
-                content: readingMessage.content,
-            });
-        } else if (message.guildId) {
-            const prefixData = await prismaUtils.prefix.findMany(
-                message.guildId
-            );
-
-            if (readingMessage.content.startsWith(".")) {
-                continue;
-            }
-
-            if (!prefixData) continue;
-            for (const prefix of prefixData) {
-                if (readingMessage.content.startsWith(prefix.name)) {
-                    continue;
-                }
-            }
-
-            chatLog.push({
-                role: "user",
-                content: readingMessage.content,
-            });
-        }
-
         // Ignore message triggers from other users.
         if (
             !readingMessage.author.bot &&
             readingMessage.author.id !== message.author.id
-        ) {
+        )
             continue;
-        }
 
         // Ignore message triggers from other bots.
         if (
@@ -385,18 +344,14 @@ const getChatLog = async (
         )
             continue;
 
-        // Include bot replies.
+        // Include AI replies to the user.
         if (
             readingMessage.author.id === message.client.user?.id &&
+            readingMessage.reference?.messageId &&
             !readingMessage.webhookId
         ) {
-            // Ignore message triggers without a reference being replied to.
-            if (!readingMessage.reference?.messageId) {
-                continue;
-            }
-
             const repliedTo = readingMessage.channel.messages.cache.get(
-                readingMessage.reference.messageId
+                readingMessage.reference?.messageId
             );
 
             if (repliedTo?.author.id !== message.author.id) {
@@ -411,7 +366,7 @@ const getChatLog = async (
         }
 
         // Include bot webhook replies.
-        if (message.guildId && readingMessage.webhookId) {
+        if (message.guildId && !isDM && readingMessage.webhookId) {
             const customAiProfileData =
                 await prismaUtils.customAiProfile.findFirst(
                     message.author.id,
@@ -431,6 +386,46 @@ const getChatLog = async (
 
                 continue;
             }
+        }
+
+        // Ignore messages created by the bot itself.
+        if (
+            readingMessage.author.bot &&
+            readingMessage.author.id === message.client.user.id &&
+            !readingMessage.webhookId
+        )
+            continue;
+
+        // Exclude messages starting with a prefix.
+        if (isDM) {
+            if (readingMessage.content.startsWith(".")) {
+                continue;
+            }
+
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
+        } else if (!isDM && message.guildId) {
+            const prefixData = await prismaUtils.prefix.findMany(
+                message.guildId
+            );
+
+            if (readingMessage.content.startsWith(".")) {
+                continue;
+            }
+
+            if (!prefixData) continue;
+            for (const prefix of prefixData) {
+                if (readingMessage.content.startsWith(prefix.name)) {
+                    continue;
+                }
+            }
+
+            chatLog.push({
+                role: "user",
+                content: readingMessage.content,
+            });
         }
     }
 
