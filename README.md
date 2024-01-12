@@ -1,3 +1,5 @@
+<img src="./images/discord-gpt.png" alt="project-icon" width="64">
+
 # discord-gpt
 Discord bot you can use to talk to GPT chatbots. It comes with useful features that help you customize your experience.
 
