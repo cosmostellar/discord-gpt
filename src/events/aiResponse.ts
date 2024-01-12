@@ -344,7 +344,7 @@ const getChatLog = async (
         )
             continue;
 
-        // Read AI replies to the user.
+        // Read bot AI replies.
         if (
             readingMessage.author.id === message.client.user?.id &&
             readingMessage.reference?.messageId &&
