@@ -24,7 +24,7 @@ const command: CommandFile = {
                     "Remove this channel from the GPT channel list."
                 )
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
+        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
     execute: async (interaction) => {
         // It shouldn't work in DMs.
