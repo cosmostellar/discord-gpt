@@ -1,6 +1,6 @@
 {
     "name": "discord-gpt",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Talk to AI on Discord! Also with useful customization features.",
     "scripts": {
         "start": "node build/index.js",
