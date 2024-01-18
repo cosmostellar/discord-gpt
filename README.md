@@ -56,6 +56,7 @@ Check the ping.
 | `ts:watch`              | Watch the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
 | `discord:deploy`        | Deploy slash commands for the specified server in the `.env` file.                                                            |
 | `discord:deploy-global` | Deploy global slash commands.                                                                                                 |
+| `prisma:push`           | Push prisma schema to the database.                                                                                           |
 | `lint`                  | Check ESLint warnings and errors.                                                                                             |
 
 

@@ -10,6 +10,7 @@
         "ts:watch": "tsc --watch",
         "discord:deploy": "node scripts/deployCommands.js",
         "discord:deploy-global": "node scripts/deployGlobalCommands.js",
+        "prisma:push": "prisma db push",
         "lint": "eslint . --ext .ts --ignore-pattern '**/*.d.ts'"
     },
     "repository": {
