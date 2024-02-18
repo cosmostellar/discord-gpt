@@ -15,7 +15,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/decaplanet/discord-gpt.git"
+        "url": "git+https://github.com/polyecho/discord-gpt.git"
     },
     "keywords": [
         "typescript",
@@ -24,12 +24,12 @@
         "openai",
         "discordjs"
     ],
-    "author": "decaplanet",
+    "author": "polyecho",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/decaplanet/discord-gpt/issues"
+        "url": "https://github.com/polyecho/discord-gpt/issues"
     },
-    "homepage": "https://github.com/decaplanet/discord-gpt#readme",
+    "homepage": "https://github.com/polyecho/discord-gpt#readme",
     "devDependencies": {
         "@types/node": "^20.3.2",
         "@typescript-eslint/eslint-plugin": "^6.12.0",
