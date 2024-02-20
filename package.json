@@ -24,7 +24,7 @@
         "openai",
         "discordjs"
     ],
-    "author": "polyecho",
+    "author": "Echo",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/polyecho/discord-gpt/issues"
