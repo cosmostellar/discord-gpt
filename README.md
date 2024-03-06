@@ -5,7 +5,7 @@ Discord bot you can use to talk to GPT chatbots. It comes with useful features t
 
 ## Commands
 ### gpt-channels
-Decide channels where the bot always answers you.
+Decides channels where the bot always answers you.
 (Otherwise, you need to ping the bot.)
 
 | command              | argument |
@@ -14,15 +14,15 @@ Decide channels where the bot always answers you.
 | /gpt-channels remove | (None)   |
 
 ### custom-ai-profile
-Set your custom name and image for your AI.
+Sets your custom name and image for your AI responses.
 
-| command                   | argument          | 
+| command                   | argument          |
 | ------------------------- | ----------------- |
 | /custom-ai-profile set    | name, profile-url |
 | /custom-ai-profile remove | (None)            |
 
 ### webhooks
-Custom profile only works in channels with webhooks.
+Custom profile only works in channels with a webhook. So you might want to add one for each channel with this command.
 
 | command          | argument |
 | ---------------- | -------- |
@@ -30,7 +30,7 @@ Custom profile only works in channels with webhooks.
 | /webhooks remove | (None)   |
 
 ### ignoring-prefix
-Set prefix the bot needs to ignore. (For other bots and messages you don't want AI to read.)
+Sets prefix the bot needs to ignore. (ex: Other bots with prefix commands, messages you don't want AI to read.)
 
 | command                 | argument |
 | ----------------------- | -------- |
@@ -39,7 +39,7 @@ Set prefix the bot needs to ignore. (For other bots and messages you don't want 
 | /ignoring-prefix view   | (None)   |
 
 ### ping
-Check the ping.
+Checks the ping.
 
 | command | argument |
 | ------- | -------- |
@@ -47,17 +47,17 @@ Check the ping.
 
 
 ## `package.json` Scripts
-| name                    | description                                                                                                                   |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `start`                 | Start the code in the `build` directory.                                                                                      |
-| `build`                 | Build the code in the `src` directory.                                                                                        |
-| `watch`                 | Watch changes in the `build` folder and reruns the process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
-| `watch:nodemon`         | Watch changes in the `build` folder and reruns the process when it detects a change.                                          |
-| `ts:watch`              | Watch the `src` directory and applies changes to the `build` directory every time TypeScript files are saved.                 |
-| `discord:deploy`        | Deploy slash commands for the specified server in the `.env` file.                                                            |
-| `discord:deploy-global` | Deploy global slash commands.                                                                                                 |
-| `prisma:push`           | Push prisma schema to the database.                                                                                           |
-| `lint`                  | Check ESLint warnings and errors.                                                                                             |
+| name                    | description                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `start`                 | Start the code in `build` directory.                                                                                        |
+| `build`                 | Build the code in `src` directory.                                                                                          |
+| `watch`                 | Watch changes in the `build` folder and reruns a process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
+| `watch:nodemon`         | Watch changes in the `build` folder and reruns a process when it detects a change.                                          |
+| `ts:watch`              | Watch the `src` directory and applies changes to `build` directory every time TypeScript files are saved.                   |
+| `discord:deploy`        | Deploy slash commands for a development server specified in `.env` file.                                                    |
+| `discord:deploy-global` | Deploy global slash commands.                                                                                               |
+| `prisma:push`           | Push prisma schema to the database.                                                                                         |
+| `lint`                  | Check ESLint warnings and errors.                                                                                           |
 
 
 ## Required Bot Permissions
