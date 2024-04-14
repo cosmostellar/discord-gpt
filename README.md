@@ -60,6 +60,10 @@ Checks the ping.
 | `lint`                  | Check ESLint warnings and errors.                                                                                           |
 
 
+## Required Privileged Gateway Intents
+- Message Content Intent
+
+
 ## Required Bot Permissions
 ### General Permissions
 - Manage Webhooks
