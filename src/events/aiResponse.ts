@@ -16,12 +16,25 @@ import { EventFile } from "../types/registerTypes";
 import * as prismaUtils from "../utils/prismaUtils";
 import { asyncUtils, webhookUtils } from "../utils/utilFunctions";
 
-let isTyping = false;
+const typingList: { [id: string]: boolean } = {};
+
 const keepTyping = async (channel: TextChannel | DMChannel) => {
-    while (isTyping) {
+    const timeoutLimit = 5000;
+    const startTime = Date.now();
+
+    while (typingList[String(channel.id)] || false) {
+        if (Date.now() - startTime > timeoutLimit) {
+            console.log(
+                `NOTICE: keepTyping for channel "${channel.id}" exceeded max duration.`
+            );
+            break;
+        }
+
         channel.sendTyping();
         await asyncUtils.delay(5000);
     }
+
+    delete typingList[channel.id];
 };
 
 const event: EventFile = {
@@ -69,7 +82,7 @@ const event: EventFile = {
         }
 
         // Show typing status.
-        isTyping = true;
+        typingList[message.channelId] = true;
         const textChannel = message.channel;
         if (
             !(
@@ -88,7 +101,7 @@ const event: EventFile = {
         });
         const prevMessages = [...prevMessagesCollection];
         if (prevMessages.length === 0) {
-            isTyping = false;
+            typingList[message.channelId] = false;
             return;
         }
 
@@ -173,7 +186,7 @@ const event: EventFile = {
                 messages: chatLog as ChatCompletionRequestMessage[],
             })
             .catch((error) => {
-                isTyping = false;
+                typingList[message.channelId] = false;
                 replyMessage(message, "Please try again later.");
                 throw new Error(`OPENAI ERR: ${error}`);
             });
@@ -201,7 +214,7 @@ const event: EventFile = {
                     await replyMessage(message, answer);
                 });
             } catch (error) {
-                isTyping = false;
+                typingList[message.channelId] = false;
                 replyMessage(message, "Please try again later.");
                 throw new Error(error as string);
             }
@@ -209,13 +222,13 @@ const event: EventFile = {
             try {
                 await replyMessage(message, reply.content);
             } catch (error) {
-                isTyping = false;
+                typingList[message.channelId] = false;
                 replyMessage(message, "Please try again later.");
                 throw new Error(error as string);
             }
         }
 
-        isTyping = false;
+        typingList[message.channelId] = false;
     },
 };
 
@@ -236,7 +249,7 @@ const replyMessage = async (
         !discordMessage.webhookId &&
         discordMessage.guildId
     ) {
-        isTyping = false;
+        typingList[discordMessage.channelId] = false;
         const tempMsg = await discordMessage.channel.send("[Processing...]");
 
         try {
