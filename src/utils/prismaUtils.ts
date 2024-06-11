@@ -51,7 +51,9 @@ const guild = {
                 })) ?? null
             );
         } catch (error) {
-            console.log("Failed to delete a guild from the database.");
+            console.log(
+                "ERROR CATCH: Failed to delete a guild from the database."
+            );
             return null;
         }
     },
@@ -108,7 +110,9 @@ const channel = {
                         })) ?? null
                     );
                 } catch (error) {
-                    console.log("Failed to create a channel in the database.");
+                    console.log(
+                        "ERROR CATCH: Failed to create a channel in the database."
+                    );
                     return null;
                 }
             }
@@ -126,7 +130,9 @@ const channel = {
                         })) ?? null
                     );
                 } catch (error) {
-                    console.log("Failed to create a channel in the database.");
+                    console.log(
+                        "ERROR CATCH: Failed to create a channel in the database."
+                    );
                     return null;
                 }
             }
@@ -159,7 +165,9 @@ const channel = {
                     })) ?? null
                 );
             } catch (error) {
-                console.log("Failed to update a channel in the database.");
+                console.log(
+                    "ERROR CATCH: Failed to update a channel in the database."
+                );
                 return null;
             }
         } else {
@@ -179,7 +187,9 @@ const channel = {
                     })) ?? null
                 );
             } catch (error) {
-                console.log("Failed to delete a channel from the database.");
+                console.log(
+                    "ERROR CATCH: Failed to delete a channel from the database."
+                );
                 return null;
             }
         } else {
@@ -256,7 +266,9 @@ const fixedPrompt = {
                     })) ?? null
                 );
             } catch (error) {
-                console.log("Failed to create a fixed prompt in the database.");
+                console.log(
+                    "ERROR CATCH: Failed to create a fixed prompt in the database."
+                );
                 return null;
             }
         } else {
@@ -291,7 +303,9 @@ const fixedPrompt = {
 
                 return Boolean(changedFixedPrompt);
             } catch (error) {
-                console.log("Failed to update a fixed prompt in the database.");
+                console.log(
+                    "ERROR CATCH: Failed to update a fixed prompt in the database."
+                );
                 return false;
             }
         } else {
@@ -315,7 +329,7 @@ const fixedPrompt = {
                 return Boolean(deletedFixedPrompt);
             } catch (error) {
                 console.log(
-                    "Failed to delete a fixed prompt from the database."
+                    "ERROR CATCH: Failed to delete a fixed prompt from the database."
                 );
                 return false;
             }
@@ -375,7 +389,7 @@ const fixedPromptTemplate = {
                 );
             } catch (error) {
                 console.log(
-                    "Failed to create a fixed prompt template in the database."
+                    "ERROR CATCH: Failed to create a fixed prompt template in the database."
                 );
                 return null;
             }
@@ -429,7 +443,7 @@ const fixedPromptTemplate = {
                 return Boolean(deletedFixedPromptTemplate);
             } catch (error) {
                 console.log(
-                    "Failed to delete a fixed prompt template from the database."
+                    "ERROR CATCH: Failed to delete a fixed prompt template from the database."
                 );
                 return false;
             }
@@ -459,7 +473,9 @@ const user = {
                 });
                 return createdUser;
             } catch (error) {
-                console.log("Failed to create a user in the database.");
+                console.log(
+                    "ERROR CATCH: Failed to create a user in the database."
+                );
                 return null;
             }
         }
@@ -511,7 +527,9 @@ const prefix = {
                 })) ?? null
             );
         } catch (error) {
-            console.log("Failed to create an ignoring prefix in the database.");
+            console.log(
+                "ERROR CATCH: Failed to create an ignoring prefix in the database."
+            );
             return null;
         }
     },
@@ -586,7 +604,7 @@ const customAiProfile = {
                 );
             } catch (error) {
                 console.log(
-                    "Failed to create a custom AI profile in the database."
+                    "ERROR CATCH: Failed to create a custom AI profile in the database."
                 );
                 return null;
             }
@@ -624,7 +642,7 @@ const customAiProfile = {
             return Boolean(changedPredefinedPrompt);
         } catch (error) {
             console.log(
-                "Failed to update a custom AI profile in the database."
+                "ERROR CATCH: Failed to update a custom AI profile in the database."
             );
             return false;
         }

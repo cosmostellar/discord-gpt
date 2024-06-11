@@ -85,7 +85,7 @@ const command: CommandFile = {
                                         : null,
                                 });
                             } catch (error) {
-                                console.log(error);
+                                console.log(`ERROR CATCH: ${error}`);
                             }
                         }
                     }

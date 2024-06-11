@@ -268,10 +268,10 @@ const replyMessage = async (
                 error.code == 50035)
             ) {
                 console.log(
-                    "Someone deleted the message before the bot tried to reply."
+                    "NOTICE: Someone deleted the message before the bot tried to reply."
                 );
             } else {
-                console.log(error);
+                console.log(`ERROR CATCH: ${error}`);
             }
         }
 
@@ -290,10 +290,10 @@ const replyMessage = async (
                 error.code == 50035)
             ) {
                 console.log(
-                    "Someone deleted the message before the bot tried to reply."
+                    "NOTICE: Someone deleted the message before the bot tried to reply."
                 );
             } else {
-                console.log(error);
+                console.log(`ERROR CATCH: ${error}`);
             }
         }
     }

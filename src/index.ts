@@ -62,7 +62,7 @@ const registerCommands = () => {
         try {
             await command.execute(interaction);
         } catch (error) {
-            console.log(error);
+            console.log(`ERROR CATCH: ${error}`);
             await interaction.reply({
                 content: "Something went wrong! Please try again later.",
                 ephemeral: true,
@@ -90,7 +90,7 @@ const registerEvents = () => {
                 try {
                     await event.execute(...args);
                 } catch (error) {
-                    console.log(error);
+                    console.log(`ERROR CATCH: ${error}`);
                 }
             });
         } else {
@@ -98,7 +98,7 @@ const registerEvents = () => {
                 try {
                     await event.execute(...args);
                 } catch (error) {
-                    console.log(error);
+                    console.log(`ERROR CATCH: ${error}`);
                 }
             });
         }

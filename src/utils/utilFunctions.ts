@@ -89,7 +89,7 @@ export const webhookUtils = {
                 }
             });
         } catch (error) {
-            console.log(error);
+            console.log(`ERROR CATCH: ${error}`);
             await otherUtils.sendMessage(
                 client,
                 channelCache.id,
@@ -150,7 +150,7 @@ export const webhookUtils = {
                 }
             });
         } catch (error) {
-            console.log(error);
+            console.log(`ERROR CATCH: ${error}`);
             otherUtils.sendMessage(
                 client,
                 channel.id,
@@ -180,8 +180,8 @@ export const otherUtils = {
 
         try {
             await channel?.send(msg);
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.log(`ERROR CATCH: ${error}`);
         }
     },
 };
