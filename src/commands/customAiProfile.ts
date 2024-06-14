@@ -122,7 +122,8 @@ const command: CommandFile = {
 
                     if (!isCustomAiProfileDeleted) {
                         return await interaction.editReply({
-                            content: "Please try again later. 😢",
+                            content:
+                                "Failed to remove AI profile. Did you set your AI profile? 🤔",
                         });
                     }
 
