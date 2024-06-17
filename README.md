@@ -47,17 +47,17 @@ Checks the ping.
 
 
 ## `package.json` Scripts
-| name                    | description                                                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `start`                 | Start the code in `build` directory.                                                                                        |
-| `build`                 | Build the code in `src` directory.                                                                                          |
-| `watch`                 | Watch changes in the `build` folder and reruns a process when it detects a change. (Requires Node.js v19.0.0 or v18.11.0+.) |
-| `watch:nodemon`         | Watch changes in the `build` folder and reruns a process when it detects a change.                                          |
-| `ts:watch`              | Watch the `src` directory and applies changes to `build` directory every time TypeScript files are saved.                   |
-| `discord:deploy`        | Deploy slash commands for a development server specified in `.env` file.                                                    |
-| `discord:deploy-global` | Deploy global slash commands.                                                                                               |
-| `prisma:push`           | Push prisma schema to the database.                                                                                         |
-| `lint`                  | Check ESLint warnings and errors.                                                                                           |
+| name                    | description                                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `start`                 | Start the code in `build` directory.                                                                                                |
+| `build`                 | Build the code in `src` directory.                                                                                                  |
+| `watch`                 | Watch changes in the `build` folder and reruns a process when it detects a change. (Requires Node.js v18.11.0+, v19.0.0, or above.) |
+| `watch:nodemon`         | Watch changes in the `build` folder and reruns a process when it detects a change.                                                  |
+| `ts:watch`              | Watch the `src` directory and applies changes to `build` directory every time TypeScript files are saved.                           |
+| `discord:deploy`        | Deploy slash commands for a development server specified in `.env` file.                                                            |
+| `discord:deploy-global` | Deploy global slash commands.                                                                                                       |
+| `prisma:push`           | Push prisma schema to the database.                                                                                                 |
+| `lint`                  | Check ESLint warnings and errors.                                                                                                   |
 
 
 ## Required Privileged Gateway Intents
