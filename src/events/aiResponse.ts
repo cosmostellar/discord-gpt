@@ -19,7 +19,7 @@ import { asyncUtils, webhookUtils } from "../utils/utilFunctions";
 const typingList: { [id: string]: boolean } = {};
 
 const keepTyping = async (channel: TextChannel | DMChannel) => {
-    const timeoutLimit = 5000;
+    const timeoutLimit = 20000;
     const startTime = Date.now();
 
     while (typingList[String(channel.id)] || false) {
