@@ -55,6 +55,8 @@ const command: CommandFile = {
         switch (subCommand) {
             case "add":
                 {
+                    await interaction.deferReply({ ephemeral: true });
+
                     let isExisting = false;
 
                     if (channel instanceof TextChannel) {
@@ -90,14 +92,15 @@ const command: CommandFile = {
                         }
                     }
 
-                    return await interaction.reply({
+                    return await interaction.editReply({
                         content: "Webhook successfully added.",
-                        ephemeral: true,
                     });
                 }
                 break;
 
             case "remove":
+                await interaction.deferReply({ ephemeral: true });
+
                 if (channel instanceof TextChannel) {
                     const existingWebhooks =
                         (await channel.fetchWebhooks()) || undefined;
@@ -117,14 +120,12 @@ const command: CommandFile = {
                     });
 
                     if (isSuccessful) {
-                        return await interaction.reply({
+                        return await interaction.editReply({
                             content: "Webhook successfully removed.",
-                            ephemeral: true,
                         });
                     } else {
-                        return await interaction.reply({
+                        return await interaction.editReply({
                             content: "There is no webhook to remove.",
-                            ephemeral: true,
                         });
                     }
                 }
