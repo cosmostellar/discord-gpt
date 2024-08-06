@@ -15,7 +15,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/cosmostellar/discord-gpt.git"
+        "url": "git+https://github.com/pixelbracket/discord-gpt.git"
     },
     "keywords": [
         "typescript",
@@ -27,9 +27,9 @@
     "author": "Stellar",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/cosmostellar/discord-gpt/issues"
+        "url": "https://github.com/pixelbracket/discord-gpt/issues"
     },
-    "homepage": "https://github.com/cosmostellar/discord-gpt#readme",
+    "homepage": "https://github.com/pixelbracket/discord-gpt#readme",
     "devDependencies": {
         "@types/node": "^20.3.2",
         "@typescript-eslint/eslint-plugin": "^6.12.0",
